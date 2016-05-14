@@ -18,8 +18,10 @@ Rectangle {
                 json;
         http.onreadystatechange = function(){
             if(http.readyState === 4 && http.status === 200){
-                json = JSON.parse(http.responseText);
-                webview(json);
+               // json = JSON.parse(http.responseText);
+               // webview(json);
+                json = http.responseText;
+                console.log(json);
 
             }
 
@@ -29,7 +31,7 @@ Rectangle {
        http.send();
 }
     function webview(json){
-        
+
     }
 
     Component.onCompleted: {
