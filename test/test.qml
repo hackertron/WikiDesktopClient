@@ -14,19 +14,17 @@ Rectangle {
 
 
     function parsing() {
-        var http = new XMLHttpRequest(),
-                json;
-        http.onreadystatechange = function(){
-            if(http.readyState === 4 && http.status === 200){
-               // json = JSON.parse(http.responseText);
-               // webview(json);
-                json = http.responseText;
-                console.log(json);
+ var http = new XMLHttpRequest(); 
+var json , parse ;
 
-            }
-
-        };
-
+  http.onreadystatechange = function(){
+    if(http.readyState == 4 && http.status == 200)
+    { json = http.responseText;
+     // alert(json);
+     parse = JSON.parse(json); 
+     console.log(parse.parse.text["*"]);
+    }
+  };
         http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Intro%20cryptography&format=json');
        http.send();
 }
