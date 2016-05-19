@@ -4,6 +4,8 @@ import QtWebKit 3.0
 
 Window {
     visible: true
+    width: 1024
+    height: 600
 
     MouseArea {
         anchors.fill: parent
@@ -33,7 +35,7 @@ Window {
 
     Text {
         id:label
-       
+
         text:  "click me "
         anchors.centerIn: parent
     }
