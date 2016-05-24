@@ -28,13 +28,15 @@ Window {
                 text = text.replace(/MathShowImage&amp;/, "MathShowImage&")
                 text = text.replace(/mode=mathml&#39;/, "mode=mathml\"");
                 text = text.replace(/<meta class="mwe-math-fallback-image-inline" aria-hidden="true" style="background-image: url\(/ ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; \" src=\"");
+                text = text.replace(/<meta class="mwe-math-fallback-image-display" aria-hidden="true" style="background-image: url\(/ ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; \" src=\"");
                 text = text.replace(/&amp;mode=mathml\"/ , "&mode=mathml>\"");
+
                 }
                 console.log(text); // after strip :p
                 webEngineView.loadHtml(text);
             }
         };
-        http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Sets&format=json');
+        http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Relations&format=json');
         http.send();
     }
 
