@@ -21,7 +21,7 @@ Window {
 
                 text = parse.parse.text["*"];
                 //console.log(text);
-                 // <-- LOOK HERE
+                 // <-- STRIP ME (o.O)
                 while(text.match(/&#39;\/index.php/)){
                 text = text.replace(/&#39;\/index.php/, "http://en.wikitolearn.org/index.php");
                 text = text.replace(/&amp;/,"&");
@@ -30,7 +30,7 @@ Window {
                 text = text.replace(/<meta class="mwe-math-fallback-image-inline" aria-hidden="true" style="background-image: url\(/ ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; \" src=\"");
                 text = text.replace(/&amp;mode=mathml\"/ , "&mode=mathml>\"");
                 }
-                console.log(text);
+                console.log(text); // after strip :p
                 webEngineView.loadHtml(text);
             }
         };
