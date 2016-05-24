@@ -21,7 +21,7 @@ Window {
 
                 text = parse.parse.text["*"];
                 console.log(text);
-                webEngineView.loadHtml(text);  // <-- LOOK HERE
+                webEngineView.loadHtml(text); 
                 return (text);
             }
         };
