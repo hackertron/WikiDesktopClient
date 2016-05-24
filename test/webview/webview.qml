@@ -36,7 +36,7 @@ Window {
                 webEngineView.loadHtml(text);
             }
         };
-        http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Relations&format=json');
+        http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Sets&format=json');
         http.send();
     }
 
