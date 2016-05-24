@@ -20,9 +20,19 @@ Window {
                 parse = JSON.parse(json);
 
                 text = parse.parse.text["*"];
-                console.log(text);
-                webEngineView.loadHtml(text); 
-                return (text);
+                //console.log(text);
+                 // <--  STRIP ME (o.O)
+                 
+                while(text.match(/&#39;\/index.php/)){
+                text = text.replace(/&#39;\/index.php/, "http://en.wikitolearn.org/index.php");
+                text = text.replace(/&amp;/,"&");
+                text = text.replace(/MathShowImage&amp;/, "MathShowImage&")
+                text = text.replace(/mode=mathml&#39;/, "mode=mathml\"");
+                text = text.replace(/<meta class="mwe-math-fallback-image-inline" aria-hidden="true" style="background-image: url\(/ ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; width: 16.928ex;\" src=\"");
+                text = text.replace(/&amp;mode=mathml\"/ , "&mode=mathml>\"");
+                }
+                console.log(text); // after getting stripped :p
+                webEngineView.loadHtml(text);
             }
         };
         http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Sets&format=json');
