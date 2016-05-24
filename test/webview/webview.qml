@@ -21,17 +21,16 @@ Window {
 
                 text = parse.parse.text["*"];
                 //console.log(text);
-                 // <--  STRIP ME (o.O)
-                 
+                 // <-- LOOK HERE
                 while(text.match(/&#39;\/index.php/)){
                 text = text.replace(/&#39;\/index.php/, "http://en.wikitolearn.org/index.php");
                 text = text.replace(/&amp;/,"&");
                 text = text.replace(/MathShowImage&amp;/, "MathShowImage&")
                 text = text.replace(/mode=mathml&#39;/, "mode=mathml\"");
-                text = text.replace(/<meta class="mwe-math-fallback-image-inline" aria-hidden="true" style="background-image: url\(/ ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; width: 16.928ex;\" src=\"");
+                text = text.replace(/<meta class="mwe-math-fallback-image-inline" aria-hidden="true" style="background-image: url\(/ ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; \" src=\"");
                 text = text.replace(/&amp;mode=mathml\"/ , "&mode=mathml>\"");
                 }
-                console.log(text); // after getting stripped :p
+                console.log(text);
                 webEngineView.loadHtml(text);
             }
         };
