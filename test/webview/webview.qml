@@ -32,7 +32,7 @@ Window {
                 text = text.replace(/&amp;mode=mathml\"/ , "&mode=mathml>\"");
 
                 }
-                console.log(text); // after strip :p
+                console.log(text); // after strip :p .
                 webEngineView.loadHtml(text);
             }
         };
