@@ -23,11 +23,13 @@ Column{
         width: root.width
         height: root.height /3
         text: "SHOW PAGE"
+        Loader{
+            id : webview
+        }
+
         onClicked: {
-            Mywebview{
+            onClicked: webview.source = "Mywebview.qml"
 
-
-            }
         }
     }
     Button{
