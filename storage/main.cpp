@@ -4,6 +4,7 @@
 #include <QtSql>
 #include <QSqlDatabase>
 #include <QSqlDriver>
+#include <QDebug>
 
 
 int main(int argc, char *argv[])
@@ -13,10 +14,21 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    QString path = "/home/arcade/cute/storage/WTL";
+    //
+    QDir databasePath;
+    //
+
+    QString path = databasePath.currentPath()+"WTL.db";
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
     db.setDatabaseName(path);
-    db.open();
+    if(!db.open())
+    {
+        qDebug() <<"error";
+    }
+    else
+    {
+        qDebug() <<"connected" ;
+    }
     QSqlQuery query;
     query.exec("CREATE TABLE IF NOT EXISTS `Pages`"
     "(  `page_ID` INT NOT NULL AUTO_INCREMENT,"
@@ -36,4 +48,3 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
-
