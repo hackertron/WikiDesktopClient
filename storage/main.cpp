@@ -1,6 +1,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <fileio.h>
+#include <QObject>
+#include <QtSql>
+#include <QSqlDatabase>
+#include <QSqlDriver>
+
 
 int main(int argc, char *argv[])
 {
@@ -8,6 +12,27 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+    QString path = "/home/arcade/cute/storage/WTL";
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+    db.setDatabaseName(path);
+    db.open();
+    QSqlQuery query;
+    query.exec("CREATE TABLE IF NOT EXISTS `Pages`"
+    "(  `page_ID` INT NOT NULL AUTO_INCREMENT,"
+    "`page_revision` VARCHAR(45) NOT NULL,"
+    "  PRIMARY KEY (`page_ID`))");
+    query.exec("CREATE TABLE IF NOT EXISTS `Dependencies` ("
+  "`depe_ID` INT NOT NULL AUTO_INCREMENT,"
+ " `depe_fileName` VARCHAR(45) NOT NULL,"
+  "`depe_lastUpdated` DATETIME NOT NULL,"
+  "PRIMARY KEY (`depe_ID`))");
+
+    query.exec("CREATE TABLE `Pages_has_Dependencies`"
+               "(`page_ID`	INTEGER NOT NULL,"
+              " `depe_ID`	INTEGER NOT NULL,"
+               "PRIMARY KEY(page_ID,depe_ID))");
+
 
     return app.exec();
 }
