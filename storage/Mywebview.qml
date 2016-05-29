@@ -10,15 +10,18 @@ Window {
     width: 600
     height: 400
 
+
     function parsing() {
         var http = new XMLHttpRequest();
-        var json , parse , text ;
+        var json , parse , text , rev_id;
 
         http.onreadystatechange = function(){
             if(http.readyState == 4 && http.status == 200)
             { json = http.responseText;
 
                 parse = JSON.parse(json);
+                rev_id = parse.parse.revid;
+                console.log(rev_id);
 
                 text = parse.parse.text["*"];
                 //console.log(text);
@@ -45,7 +48,12 @@ Window {
     WebView{
         id: webEngineView
         anchors.fill: parent
+
+
     }
 
     Component.onCompleted: parsing()
+
+
+
 }
