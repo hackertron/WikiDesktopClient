@@ -13,7 +13,7 @@ public:
 
     Q_INVOKABLE void add();
     Q_INVOKABLE void del();
-    Q_INVOKABLE void save_page(QVariant html, QVariant revid);
+    
 
 signals:
 
