@@ -16,6 +16,7 @@
 
 
 
+
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
 
@@ -47,7 +48,17 @@ void dbmanager::add()
           QJsonObject jsonObj = jsonResponse.object();
 
 
-         qDebug() << jsonResponse.object()["parse"].toObject()["text"].toObject()["*"].toString();
+         QString text = jsonResponse.object()["parse"].toObject()["text"].toObject()["*"].toString();
+         text = text.replace("\n","");
+         text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
+         text = text.replace("&amp;","&");
+         text = text.replace("MathShowImage&amp;", "MathShowImage&");
+         text = text.replace("mode=mathml&#39;", "mode=mathml\"");
+         text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; " "src=");
+         text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; " "src=");
+         text = text.replace("&amp;mode=mathml\"" , "&mode=mathml>\"");
+
+         qDebug() << text;
          delete reply;
        }
        else {
@@ -85,4 +96,3 @@ void dbmanager::del()
 {
     qDebug() <<"DELETION CODE GOES HERE";
 }
-
