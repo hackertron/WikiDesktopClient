@@ -4,15 +4,9 @@
 #include <QSqlDriver>
 #include <QCoreApplication>
 #include <QDebug>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QUrl>
-#include <QUrlQuery>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QByteArray>
-#include <QFile>
+#include <QQmlcomponent>
+#include <QQmlcontext>
+#include <QQmlEngine>
 
 
 
@@ -24,6 +18,17 @@ dbmanager::dbmanager(QObject *parent) : QObject(parent)
 void dbmanager::add()
 {
 
+    QQmlEngine engine;
+QQmlComponent component(&engine, "Mywebview.qml");
+QObject *object = component.create();
+
+QVariant returnedValue;
+QMetaObject::invokeMethod(object, "myQmlFunction",Q_RETURN_ARG(QVariant, returnedValue));
+
+qDebug() << "QML function returned:" << returnedValue.toString();
+
+delete object;
+/*
     QDir databasePath;
     QString path = databasePath.currentPath()+"WTL.db";
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
@@ -46,6 +51,7 @@ void dbmanager::add()
     {
      qDebug() <<query.lastError();
     }
+    */
     
 }
 
