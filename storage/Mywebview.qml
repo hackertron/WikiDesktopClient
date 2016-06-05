@@ -2,13 +2,15 @@ import QtQuick 2.5
 import QtQuick.Window 2.2
 import QtWebEngine 1.1
 import QtWebKit 3.0
-
+import QtQuick.Dialogs 1.2
+import QtQuick.Controls 1.4
 
 Window {
     id:webview
     visible: true
     width: 600
     height: 400
+
 
 
     function parsing() {
@@ -37,7 +39,9 @@ Window {
 
                 }
                 console.log(text); // after strip :p .
+
                 webEngineView.loadHtml(text);
+                return(text);
             }
         };
         http.open('GET','http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Sets&format=json');
@@ -52,8 +56,7 @@ Window {
 
     }
 
+
     Component.onCompleted: parsing()
-
-
 
 }
