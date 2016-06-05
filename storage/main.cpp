@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
     QSqlQuery query;
 
    if( query.exec("CREATE TABLE IF NOT EXISTS `Pages`"
-    "(  `page_ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
-    "`page_revision` VARCHAR(45) NOT NULL);"))
+    "(  `page_ID` INTEGER NOT NULL PRIMARY KEY ,"
+    "`page_revision` INT  NOT NULL);"))
    {
        qDebug() << "pages table created";
    }
