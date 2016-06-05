@@ -13,6 +13,10 @@
 #include <QJsonDocument>
 #include <QByteArray>
 #include <QFile>
+#include <QRegularExpression>
+#include <QString>
+#include <QTextStream>
+
 
 
 
@@ -22,9 +26,14 @@ dbmanager::dbmanager(QObject *parent) : QObject(parent)
 
 }
 
+
+
+
 void dbmanager::add()
 {
 
+    QString text ;
+    int pageid , revid;
 
 
     // create custom temporary event loop on stack
@@ -48,17 +57,21 @@ void dbmanager::add()
           QJsonObject jsonObj = jsonResponse.object();
 
 
-         QString text = jsonResponse.object()["parse"].toObject()["text"].toObject()["*"].toString();
+          text = jsonResponse.object()["parse"].toObject()["text"].toObject()["*"].toString();
+          pageid = jsonResponse.object()["parse"].toObject()["pageid"].toInt();
+          revid = jsonResponse.object()["parse"].toObject()["revid"].toInt();
          text = text.replace("\n","");
          text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
          text = text.replace("&amp;","&");
          text = text.replace("MathShowImage&amp;", "MathShowImage&");
-         text = text.replace("mode=mathml&#39;", "mode=mathml\"");
-         text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; " "src=");
-         text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex; " "src=");
+         text = text.replace("mode=mathml&#39;", "mode=mathml""");
+         text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
+         text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
          text = text.replace("&amp;mode=mathml\"" , "&mode=mathml>\"");
+       //  qDebug() << text;
+         qDebug() <<pageid;
 
-         qDebug() << text;
+
          delete reply;
        }
        else {
@@ -66,6 +79,27 @@ void dbmanager::add()
            qDebug() << "Failure" <<reply->errorString();
            delete reply;
        }
+       QDir dir;
+       QString Folder_name = QString::number(pageid);
+       if(QDir(Folder_name).exists())
+       {
+        qDebug() << " already exist ";
+
+       }
+       else{
+           dir.mkdir(Folder_name);
+       }
+       QDir dr(Folder_name);
+       QString filename = Folder_name+".html";
+       QFile file(filename);
+         file.open(QIODevice::WriteOnly | QIODevice::Text);
+         QTextStream out(&file);
+         out << text;
+
+         // optional, as QFile destructor will already do it:
+         file.close();
+
+
 
     QDir databasePath;
     QString path = databasePath.currentPath()+"WTL.db";
@@ -79,16 +113,23 @@ void dbmanager::add()
     {
         qDebug() <<"connected to DB" ;
     }
+
     QSqlQuery query;
 
-    if( query.exec(""))
-    {
-        qDebug() << "PAGE ADDED successfully";
-    }
-    else
-    {
-     qDebug() <<query.lastError();
-    }
+    query.prepare("INSERT INTO pages (page_ID,page_revision) "
+                     "VALUES (? , ?)");
+       query.bindValue(0,pageid);
+       query.bindValue(1, revid);
+
+       if(query.exec())
+       {
+           qDebug() << "done";
+       }
+       else
+       {
+           qDebug() << query.lastError();
+       }
+
 
 }
 
