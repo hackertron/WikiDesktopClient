@@ -16,6 +16,7 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QTextStream>
+#include <QRegularExpression>
 
 
 
@@ -61,6 +62,43 @@ bool add_in_db(int pageid , int revid)
        return (false);
 }
 
+bool save_images(QString filename)
+{
+    QString content;
+   qDebug() << filename;
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+         qDebug() <<"unable to open file";
+         return false;
+    }
+    else{
+         content = file.readAll();
+        //qDebug() << content ;
+
+        file.close();
+
+
+    }
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() <<"unable to write to file";
+        return false;
+    }
+    else
+    {
+        qDebug() <<"write to file here";
+        QTextStream out(&file);
+        out << content;
+
+        file.close();
+
+    }
+
+return true ;
+
+}
+
 
 void dbmanager::add()
 {
@@ -100,13 +138,13 @@ void dbmanager::add()
          text = text.replace("mode=mathml&#39;", "mode=mathml""");
          text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
          text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
-         text = text.replace("&amp;mode=mathml\"" , "&mode=mathml>\"");
+         text = text.replace("&mode=mathml);" , "&mode=mathml\">");
        //  qDebug() << text;
          qDebug() <<pageid;
 
-
          delete reply;
        }
+
        else {
            //failure
            qDebug() << "Failure" <<reply->errorString();
@@ -122,7 +160,7 @@ void dbmanager::add()
        else{
            dir.mkdir(Folder_name);
 
-           QDir dr(Folder_name);
+
            QString filename = Folder_name+".html";
            QFile file(filename);
              file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -140,6 +178,8 @@ void dbmanager::add()
              {
                  qDebug() <<" failed to add in DB ";
              }
+
+              success = save_images(filename);
        }
 
 
@@ -148,7 +188,7 @@ void dbmanager::add()
 
     /* * ***************************************************** */
 
-/************************** DB CODE was here now it has it's own function add_in_db ********************/
+/************************** DB CODE was here  ********************/
 
 }
 
