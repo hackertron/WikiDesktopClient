@@ -26,7 +26,40 @@ dbmanager::dbmanager(QObject *parent) : QObject(parent)
 
 }
 
+bool add_in_db(int pageid , int revid)
+{
+    QDir databasePath;
+    QString path = databasePath.currentPath()+"WTL.db";
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+    db.setDatabaseName(path);
+    if(!db.open())
+    {
+        qDebug() <<"error in opening DB";
+    }
+    else
+    {
+        qDebug() <<"connected to DB" ;
+    }
 
+    QSqlQuery query;
+
+    query.prepare("INSERT INTO pages (page_ID,page_revision) "
+                     "VALUES (? , ?)");
+       query.bindValue(0,pageid);
+       query.bindValue(1, revid);
+
+       if(query.exec())
+       {
+           qDebug() << "done";
+           return(true);
+       }
+       else
+       {
+           qDebug() << query.lastError();
+
+       }
+       return (false);
+}
 
 
 void dbmanager::add()
@@ -88,48 +121,34 @@ void dbmanager::add()
        }
        else{
            dir.mkdir(Folder_name);
-       }
-       QDir dr(Folder_name);
-       QString filename = Folder_name+".html";
-       QFile file(filename);
-         file.open(QIODevice::WriteOnly | QIODevice::Text);
-         QTextStream out(&file);
-         out << text;
 
-         // optional, as QFile destructor will already do it:
-         file.close();
+           QDir dr(Folder_name);
+           QString filename = Folder_name+".html";
+           QFile file(filename);
+             file.open(QIODevice::WriteOnly | QIODevice::Text);
+             QTextStream out(&file);
+             out << text;
 
-
-
-    QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
-    if(!db.open())
-    {
-        qDebug() <<"error in opening DB";
-    }
-    else
-    {
-        qDebug() <<"connected to DB" ;
-    }
-
-    QSqlQuery query;
-
-    query.prepare("INSERT INTO pages (page_ID,page_revision) "
-                     "VALUES (? , ?)");
-       query.bindValue(0,pageid);
-       query.bindValue(1, revid);
-
-       if(query.exec())
-       {
-           qDebug() << "done";
-       }
-       else
-       {
-           qDebug() << query.lastError();
+             // optional, as QFile destructor will already do it:
+             file.close();
+             bool success = add_in_db(pageid,revid);
+             if(success == true)
+             {
+                 qDebug() <<"entry added to DB successfully ";
+             }
+             else
+             {
+                 qDebug() <<" failed to add in DB ";
+             }
        }
 
+
+
+
+
+    /* * ***************************************************** */
+
+/************************** DB CODE was here now it has it's own function add_in_db ********************/
 
 }
 
