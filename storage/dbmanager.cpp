@@ -64,7 +64,7 @@ bool add_in_db(int pageid , int revid)
 
 bool save_images(QString filename)
 {
-    QString content;
+    QString content , path , style;
    qDebug() << filename;
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -74,7 +74,20 @@ bool save_images(QString filename)
     }
     else{
          content = file.readAll();
+         //  download images here
         //qDebug() << content ;
+        QRegularExpression link_regex("<img (?<style>.*?)src=(?<path>.*?)>");
+        QRegularExpressionMatch links = link_regex.match(content);
+        while(links.hasMatch())
+        {
+             style = links.captured("style");
+             path  = links.captured("path");
+             qDebug() << style;
+             qDebug() << path;
+             // it's not complete , this loop  is infinite loop .
+
+        }
+
 
         file.close();
 
@@ -186,9 +199,7 @@ void dbmanager::add()
 
 
 
-    /* * ***************************************************** */
-
-/************************** DB CODE was here  ********************/
+ 
 
 }
 
