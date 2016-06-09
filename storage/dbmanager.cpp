@@ -17,6 +17,8 @@
 #include <QString>
 #include <QTextStream>
 #include <QRegularExpression>
+#include "downloader.h"
+#include <QStringList>
 
 
 
@@ -75,21 +77,20 @@ bool save_images(QString filename)
     else{
          content = file.readAll();
          //  download images here
-        //qDebug() << content ;
-        QRegularExpression link_regex("<img (?<style>.*?)src=(?<path>.*?)>");
-        QRegularExpressionMatch links = link_regex.match(content);
-        while(links.hasMatch())
-        {
-             style = links.captured("style");
-             path  = links.captured("path");
-             qDebug() << style;
-             qDebug() << path;
-             // it's not complete , this loop  is infinite loop .
 
+        QRegularExpression link_regex("src=(?<path>.*?)>");
+        QRegularExpressionMatchIterator links = link_regex.globalMatch(content);
+
+        QStringList down_links;
+        while (links.hasNext()) {
+            QRegularExpressionMatch match = links.next();
+            QString down_link = match.captured(1);
+            down_links << down_link;
         }
 
+        qDebug() << down_links;
 
-        file.close();
+       file.close();
 
 
     }
@@ -199,7 +200,7 @@ void dbmanager::add()
 
 
 
- 
+
 
 }
 
