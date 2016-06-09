@@ -5,7 +5,7 @@ void Downloader::downloadFileFromURL(const QString &url, const QString &filePath
         return;
     m_isReady = false;
 
-    const QString fileName = filePath + url.right(url.size() - url.lastIndexOf("/")); // your filePath should end with a forward slash "/"
+    const QString fileName = filePath + url.right(url.size() - url.lastIndexOf("/")); 
     m_file = new QFile();
     m_file->setFileName(fileName);
     m_file->open(QIODevice::WriteOnly);
