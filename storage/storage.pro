@@ -19,3 +19,4 @@ include(deployment.pri)
 HEADERS += \
     dbmanager.h \
     downloader.h
+ 
