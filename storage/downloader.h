@@ -1,26 +1,32 @@
 #ifndef DOWNLOADER_H
 #define DOWNLOADER_H
 
-#include <QFile>
+#include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QObject>
 #include <QUrl>
+#include <QDateTime>
+#include <QFile>
+#include <QDebug>
 
-class Downloader : public QObject {
+
+class Downloader : public QObject
+{
     Q_OBJECT
-    QFile *m_file;
-    bool m_isReady = true;
-
 public:
-    explicit Downloader(QObject *parent = 0) : QObject(parent) {}
-    virtual ~Downloader() {}
+    explicit Downloader(QObject *parent = 0);
 
-    void downloadFileFromURL(const QString &url, const QString &filePath);
+    void doDownload(QString &url);
 
-private slots:
-    void onDownloadFileComplete(QNetworkReply *reply);
+signals:
+
+public slots:
+    void replyFinished (QNetworkReply *reply);
+
+private:
+   QNetworkAccessManager *manager;
+
 };
 
 #endif // DOWNLOADER_H
