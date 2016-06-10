@@ -24,10 +24,15 @@
 
 
 
+
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
 
 }
+
+
+
+
 
 bool add_in_db(int pageid , int revid)
 {
@@ -88,7 +93,24 @@ bool save_images(QString filename)
             down_links << down_link;
         }
 
-        qDebug() << down_links;
+       // qDebug() << down_links;
+
+        int size = down_links.size();
+
+        QDir dpath;
+        QString filepath = dpath.currentPath();
+        Downloader down;
+
+        QString send_links[size];
+        for(int z = 0 ; z < size ; ++z)
+        {
+            send_links[z] = down_links.at(z);
+            qDebug() << send_links[z];
+            down.doDownload(send_links[z]);
+
+
+        }
+
 
        file.close();
 
