@@ -1,45 +1,37 @@
 #include "downloader.h"
 
-Downloader::Downloader(QObject *parent) :
-    QObject(parent)
-{
-}
 
-static QString fname ;
+void Downloader::downloadFileFromURL(const QString &url, const QString &filePath) {
+    if (!m_isReady)
+        return;
+    m_isReady = false;
 
-void Downloader::doDownload(QString &url)
-{
-    fname = url ;
-    manager = new QNetworkAccessManager(this);
-
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinished(QNetworkReply*)));
-
-    manager->get(QNetworkRequest(QUrl(url
-)));
-}
-
-void Downloader::replyFinished (QNetworkReply *reply)
-{
-    if(reply->error())
-    {
-        qDebug() << "ERROR!";
-        qDebug() << reply->errorString();
-    }
-    else
-    {
-         qDebug() << reply->readAll();
-
-        QString filename =  fname;
-        QFile *file = new QFile(filename);
-        if(file->open(QFile::Append))
-        {
-            file->write(reply->readAll());
-            file->flush();
-            file->close();
-        }
-        delete file;
+    const QString fileName = filePath + url.right(url.size() - url.lastIndexOf("/")); 
+    m_file = new QFile();
+    m_file->setFileName(fileName);
+    m_file->open(QIODevice::WriteOnly);
+    if (!m_file->isOpen()) {
+        m_isReady = true;
+        return; // TODO: permission check?
     }
 
-    reply->deleteLater();
+    QNetworkAccessManager *manager = new QNetworkAccessManager;
+
+    QNetworkRequest request;
+    request.setUrl(QUrl(url));
+
+    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(onDownloadFileComplete(QNetworkReply *)));
+
+    manager->get(request);
+}
+
+void Downloader::onDownloadFileComplete(QNetworkReply *reply) {
+    if (!m_file->isWritable()) {
+        m_isReady = true;
+        return; // TODO: error check
+    }
+
+    m_file->write(reply->readAll());
+    m_file->close(); // TODO: delete the file from the system later on
+    m_isReady = true;
 }
