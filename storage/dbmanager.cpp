@@ -20,19 +20,18 @@
 #include "downloader.h"
 #include <QStringList>
 
+#include <QFileInfo>
 
 
-
+int current= 0;
+QStringList down_links;
+QString imgpath;
 
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
 
 }
-
-
-
-
 
 bool add_in_db(int pageid , int revid)
 {
@@ -71,8 +70,8 @@ bool add_in_db(int pageid , int revid)
 
 bool save_images(QString filename)
 {
-    QString content , path , style;
-   qDebug() << filename;
+    QString content , newpath , style;
+    qDebug() << filename +"html filename ";
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -86,53 +85,112 @@ bool save_images(QString filename)
         QRegularExpression link_regex("src=(?<path>.*?)>");
         QRegularExpressionMatchIterator links = link_regex.globalMatch(content);
 
-        QStringList down_links;
         while (links.hasNext()) {
             QRegularExpressionMatch match = links.next();
-            QString down_link = match.captured(1);
-            down_links << down_link;
-        }
-
-       // qDebug() << down_links;
-
-        int size = down_links.size();
-
-        QDir dpath;
-        QString filepath = dpath.currentPath();
-        Downloader down;
-
-        QString send_links[size];
-        for(int z = 0 ; z < size ; ++z)
-        {
-            send_links[z] = down_links.at(z);
-            qDebug() << send_links[z];
-            down.doDownload(send_links[z]);
-
+            QString down_link = match.captured(1).remove(QString("&mode=mathml\"")); ;
+//            qDebug()<<down_link.remove(QString("&mode=mathml\""));
+            down_links << down_link;  //prepare list of downloads
+            //start downloading images
+            QString d = content.replace("&mode=mathml\"",".svg"); //clean img src in local html file
+            newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",imgpath+"/"); // clean img src in local html file and prepare the local path those are to be saved in html file
 
         }
 
 
-       file.close();
 
+        qDebug() << down_links; //got the list of downloads
+        file.close();
 
     }
+
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qDebug() <<"unable to write to file";
         return false;
     }
+
     else
     {
         qDebug() <<"write to file here";
         QTextStream out(&file);
-        out << content;
+        out << newpath;
+       // qDebug()<<newpath;
 
         file.close();
 
     }
 
+    dbmanager *d = new dbmanager(0) ;
+    d->doDownload(down_links);
+
 return true ;
 
+}
+
+
+//start downloading images
+
+
+
+
+void dbmanager::doDownload(const QVariant& v)
+{
+    if (v.type() == QVariant::StringList) {
+
+
+        QNetworkAccessManager *manager= new QNetworkAccessManager(this);
+
+             QUrl url = v.toStringList().at(current);
+
+             filename = url.toString().remove("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=");
+             m_network_reply = manager->get(QNetworkRequest(QUrl(url)));
+
+             connect(m_network_reply, SIGNAL(downloadProgress (qint64, qint64)),this, SLOT(updateDownloadProgress(qint64, qint64)));
+             connect(m_network_reply,SIGNAL(finished()),this,SLOT(downloadFinished()));
+
+
+    }
+}
+
+
+
+void dbmanager::downloadFinished(){
+    qDebug()<<filename;
+        if(m_network_reply->error() == QNetworkReply::NoError){
+
+
+             m_file =  new QFile(imgpath+"/"+filename+".svg");
+             qDebug()<<imgpath+"/"+filename;
+             if(!m_file->open(QIODevice::ReadWrite | QIODevice::Truncate)){
+                 qDebug() << m_file->errorString();
+              }
+             m_file->write(m_network_reply->readAll());
+
+             QByteArray bytes = m_network_reply->readAll();
+             QString str = QString::fromUtf8(bytes.data(), bytes.size());
+             int statusCode = m_network_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+             qDebug() << QVariant(statusCode).toString();
+         }
+          m_file->flush();
+          m_file->close();
+            int total = down_links.count();
+            if(current<total-1){
+             current++;
+             qDebug()<<"current = "<<current<<"total = "<<total;
+             doDownload(down_links);}
+            else if(current==total-1)
+            {
+                qDebug()<<"download complete";
+            }
+
+}
+
+
+void dbmanager::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
+{
+//    ui->progressBar->setMaximum(totalBytes);
+//    ui->progressBar->setValue(bytesRead);
+    qDebug()<<bytesRead<<totalBytes;
 }
 
 
@@ -164,9 +222,9 @@ void dbmanager::add()
           QJsonObject jsonObj = jsonResponse.object();
 
 
-          text = jsonResponse.object()["parse"].toObject()["text"].toObject()["*"].toString();
-          pageid = jsonResponse.object()["parse"].toObject()["pageid"].toInt();
-          revid = jsonResponse.object()["parse"].toObject()["revid"].toInt();
+          text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
+          pageid = jsonObj["parse"].toObject()["pageid"].toInt();
+          revid = jsonObj["parse"].toObject()["revid"].toInt();
          text = text.replace("\n","");
          text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
          text = text.replace("&amp;","&");
@@ -187,17 +245,17 @@ void dbmanager::add()
            delete reply;
        }
        QDir dir;
-       QString Folder_name = QString::number(pageid);
-       if(QDir(Folder_name).exists())
+       imageDownloadPath = QString::number(pageid);
+       imgpath =imageDownloadPath;
+
+       if(QDir(imageDownloadPath).exists())
        {
         qDebug() << " already exist ";
-
        }
        else{
-           dir.mkdir(Folder_name);
+           dir.mkdir(imageDownloadPath);
 
-
-           QString filename = Folder_name+".html";
+           QString filename = imageDownloadPath+".html";
            QFile file(filename);
              file.open(QIODevice::WriteOnly | QIODevice::Text);
              QTextStream out(&file);
@@ -217,11 +275,6 @@ void dbmanager::add()
 
               success = save_images(filename);
        }
-
-
-
-
-
 
 
 }
