@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick sql network
+QT += qml quick sql network webkit
 
 CONFIG += c++11
 
@@ -19,4 +19,3 @@ include(deployment.pri)
 HEADERS += \
     dbmanager.h \
     downloader.h
- 
