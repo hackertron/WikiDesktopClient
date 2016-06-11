@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   if(query.exec("CREATE TABLE IF NOT EXISTS `Dependencies` ("
      "`depe_ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
     " `depe_fileName` VARCHAR(45) NOT NULL,"
-    "`depe_lastUpdated` DATETIME NOT NULL);"))
+    "`revision_num` INTEGER NOT NULL);"))
   {
       qDebug() << "Dependencies table created";
   }
