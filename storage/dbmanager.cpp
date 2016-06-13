@@ -178,6 +178,12 @@ bool save_images(QString filename)
     {
         qDebug() <<"write to file here";
         QTextStream out(&file);
+
+        newpath = "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">" + newpath;
+        newpath = newpath.replace("svg> background-repeat:", "svg> <!--background-repeat:");
+        newpath = newpath.replace("ex;\" />", "-->");
+
+
         out << newpath;
         // qDebug()<<newpath;
 
