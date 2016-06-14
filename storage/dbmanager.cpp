@@ -19,8 +19,8 @@
 #include <QRegularExpression>
 #include "downloader.h"
 #include <QStringList>
-
 #include <QFileInfo>
+#include <QInputDialog>
 
 
 int current= 0;
@@ -294,7 +294,7 @@ void dbmanager::add()
     QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
     // the HTTP request
-    QNetworkRequest req( QUrl( QString("http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Sets&format=json") ) );
+    QNetworkRequest req( QUrl( QString("http://en.wikitolearn.org/api.php?action=parse&page=Linear_Algebra/Sets&format=json") ) );
     QNetworkReply *reply = mgr.get(req);
     eventLoop.exec();
 
@@ -418,5 +418,6 @@ void dbmanager::add()
     {
         qDebug() <<"DELETION CODE GOES HERE";
     }
+
 
 
