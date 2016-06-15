@@ -1,6 +1,7 @@
 TEMPLATE = app
 
-QT += qml quick sql network webkit
+QT += qml quick sql network webkit webkitwidgets widgets
+QT += webengine
 
 CONFIG += c++11
 
