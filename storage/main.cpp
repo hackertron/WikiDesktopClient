@@ -8,12 +8,13 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <dbmanager.h>
+#include <QtWebEngine/QtWebEngine>
 
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-
+    QtWebEngine::initialize();
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
@@ -132,9 +133,5 @@ int main(int argc, char *argv[])
           QTextStream stream(&file);
           stream << styling << endl;
       }
-
-
-
-
     return app.exec();
 }
