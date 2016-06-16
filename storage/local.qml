@@ -13,6 +13,8 @@ Window {
     width: 600
     height: 400
 
+property url local_url :""
+
 FileDialog {
     id: fileDialog
     nameFilters: [ "HTML files (*.htm *.html)", "All files (*)" ]
@@ -20,8 +22,9 @@ FileDialog {
     title: "Please choose a file"
     folder: shotrcuts.home
     onAccepted: {
-        console.log("You chose: " + fileDialog.fileUrls)
-        web.url(fileDialog.fileUrls)
+        console.log("You chose: " + fileDialog.fileUrl)
+
+        local_url = fileDialog.fileUrl
 
        // Qt.quit()
     }
@@ -34,6 +37,7 @@ FileDialog {
 WebView{
     id : web
     anchors.fill: parent
+    url : local_url
 
 }
 
