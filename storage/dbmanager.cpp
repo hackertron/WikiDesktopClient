@@ -20,7 +20,8 @@
 #include "downloader.h"
 #include <QStringList>
 #include <QFileInfo>
-#include <QInputDialog>
+
+
 
 
 int current= 0;
@@ -136,7 +137,7 @@ bool add_in_db(int pageid , int revid)
 bool save_images(QString filename)
 {
     QString content , newpath , style;
-    qDebug() << filename +"html filename ";
+    qDebug() << filename +" <- html filename ";
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -157,7 +158,8 @@ bool save_images(QString filename)
             down_links << down_link;  //prepare list of downloads
             //start downloading images
             QString d = content.replace("&mode=mathml\"",".svg"); //clean img src in local html file
-            newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",imgpath+"/"); // clean img src in local html file and prepare the local path those are to be saved in html file
+            qDebug() << imgpath ;
+            newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",""); // clean img src in local html file and prepare the local path those are to be saved in html file
 
         }
 
@@ -188,6 +190,15 @@ bool save_images(QString filename)
         // qDebug()<<newpath;
 
         file.close();
+
+        // move html file to their respective folder
+        QString temp_name = filename;
+       QString new_name = temp_name.replace(".html","");
+       QString css_path = new_name;
+        new_name = new_name + "/" + filename;
+        file.rename(filename,new_name);
+        css_path = css_path + "/main.css";
+        file.copy("main.css",css_path);
 
     }
 
@@ -378,6 +389,7 @@ void dbmanager::add()
                 dir.mkdir(imageDownloadPath);
 
                 QString filename = imageDownloadPath+".html";
+
                 QFile file(filename);
                 file.open(QIODevice::WriteOnly | QIODevice::Text);
                 QTextStream out(&file);
@@ -418,6 +430,4 @@ void dbmanager::add()
     {
         qDebug() <<"DELETION CODE GOES HERE";
     }
-
-
 
