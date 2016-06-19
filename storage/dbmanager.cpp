@@ -20,7 +20,7 @@
 #include "downloader.h"
 #include <QStringList>
 #include <QFileInfo>
-
+#include <QVector>
 
 
 
@@ -28,11 +28,79 @@ int current= 0;
 QStringList down_links;
 QString imgpath;
 int revision_number = 0;
-int count  = 1;
+int count = 1;
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
 
+}
+
+bool del_from_db(QString id,int revid)
+{
+    bool done;
+    QDir databasePath;
+    QString path = databasePath.currentPath()+"WTL.db";
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+    db.setDatabaseName(path);
+    if(!db.open())
+    {
+        qDebug() <<"error in opening DB";
+    }
+    else
+    {
+        qDebug() <<"connected to DB" ;
+
+    }
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM Pages WHERE page_ID = '" + id + "'");
+
+
+
+    if(query.exec())
+    {
+        qDebug() << "deleted from table Pages";
+        done = true;
+
+    }
+    else
+    {
+        qDebug() << query.lastError();
+
+    }
+    query.prepare("DELETE FROM Dependencies WHERE revision_number = '" + QString::number(revid) + "'");
+
+
+    if(query.exec())
+    {
+        qDebug() << "deleted from table Pages";
+        done = true;
+
+    }
+    else
+    {
+        qDebug() << query.lastError();
+
+    }
+    if(done == true)
+        return true;
+    else
+        return false;
+
+
+}
+
+QString clean_text(QString text)
+{
+    text = text.replace("\n","");
+    text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
+    text = text.replace("&amp;","&");
+    text = text.replace("MathShowImage&amp;", "MathShowImage&");
+    text = text.replace("mode=mathml&#39;", "mode=mathml""");
+    text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
+    text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
+    text = text.replace("&mode=mathml);" , "&mode=mathml\">");
+    return(text);
 }
 
 bool check_links(QString text)
@@ -79,16 +147,19 @@ bool add_depend(QString filename , int revision_number)
     query.bindValue(0,count);
     query.bindValue(1,filename);
     query.bindValue(2, revision_number);
-    ++count;
+    ++count ;
+
 
     if(query.exec())
     {
         qDebug() << "done";
+        db.close();
         return(true);
     }
     else
     {
         qDebug() << query.lastError();
+        db.close();
 
     }
     return (false);
@@ -125,10 +196,12 @@ bool add_in_db(int pageid , int revid)
     {
         qDebug() << "done";
         return(true);
+        db.close();
     }
     else
     {
         qDebug() << query.lastError();
+        db.close();
 
     }
     return (false);
@@ -305,7 +378,7 @@ void dbmanager::add()
     QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
     // the HTTP request
-    QNetworkRequest req( QUrl( QString("http://en.wikitolearn.org/api.php?action=parse&page=Linear_Algebra/Sets&format=json") ) );
+    QNetworkRequest req( QUrl( QString("http://en.wikitolearn.org/api.php?action=parse&page=Linear_Algebra/Relations&format=json") ) );
     QNetworkReply *reply = mgr.get(req);
     eventLoop.exec();
 
@@ -321,14 +394,9 @@ void dbmanager::add()
         text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
         pageid = jsonObj["parse"].toObject()["pageid"].toInt();
         revid = jsonObj["parse"].toObject()["revid"].toInt();
-        text = text.replace("\n","");
-        text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
-        text = text.replace("&amp;","&");
-        text = text.replace("MathShowImage&amp;", "MathShowImage&");
-        text = text.replace("mode=mathml&#39;", "mode=mathml""");
-        text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
-        text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
-        text = text.replace("&mode=mathml);" , "&mode=mathml\">");
+
+        //clean the result from the API
+        text = clean_text(text);
         //  qDebug() << text;
         qDebug() <<pageid;
 
@@ -362,6 +430,15 @@ void dbmanager::add()
 
             // optional, as QFile destructor will already do it:
             file.close();
+            // move html file to their respective folder
+            QString temp_name = filename;
+           QString new_name = temp_name.replace(".html","");
+           QString css_path = new_name;
+            new_name = new_name + "/" + filename;
+            file.rename(filename,new_name);
+            css_path = css_path + "/main.css";
+            file.copy("main.css",css_path);
+
             bool success = add_in_db(pageid,revid);
             if(success == true)
             {
@@ -429,5 +506,111 @@ void dbmanager::add()
     void dbmanager::del()
     {
         qDebug() <<"DELETION CODE GOES HERE";
+    }
+
+    bool check_revision(QString id , int revision_number)
+    {
+
+        QEventLoop eventLoop;
+
+        // "quit()" the event-loop, when the network request "finished()"
+        QNetworkAccessManager mg;
+        QObject::connect(&mg, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+        // the HTTP request
+        QString url = "http://en.wikitolearn.org/api.php?action=parse&pageid="+id+"&format=json";
+        QNetworkRequest re( ( url ) );
+        QNetworkReply *reply = mg.get(re);
+        eventLoop.exec();
+
+        if (reply->error() == QNetworkReply::NoError) {
+            //success
+            //qDebug() << "Success" <<reply->readAll();
+            QString   html = (QString)reply->readAll();
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(html.toUtf8());
+
+            QJsonObject jsonObj = jsonResponse.object();
+
+            int  revid = jsonObj["parse"].toObject()["revid"].toInt();
+            qDebug() << jsonObj["parse"].toObject()["title"].toString();
+
+
+            if(revision_number == revid)
+            {
+                delete reply;
+                return true ;
+            }
+            else
+            {
+                qDebug() << "update page";
+                QString text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
+                text = clean_text(text);
+                bool del = del_from_db(id,revid);
+                //check if deletion was successfull
+                if(del == true)
+                {
+                    qDebug() << "deletion from DB done";
+                }
+                else
+                {
+                    qDebug() << "error in deletion from DB";
+                }
+
+
+                
+            }
+    }
+
+    }
+
+
+
+    void dbmanager::update()
+    {
+
+        QDir databasePath;
+        QString path = databasePath.currentPath()+"WTL.db";
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+        db.setDatabaseName(path);
+        if(!db.open())
+        {
+            qDebug() <<"error in opening DB";
+        }
+        else
+        {
+            qDebug() <<"connected to DB" ;
+        }
+
+
+        bool change = false ;
+        QSqlQuery count;
+
+        QVector<QString> id ;
+        QVector<int> revid;
+
+
+         QSqlQuery query("SELECT page_ID , page_revision FROM Pages");
+           while (query.next()) {
+                QString i = query.value(0).toString();
+                id.push_back(i);
+               int r = query.value(1).toInt();
+               revid.push_back(r);
+
+           }
+           for(int i = 0 ; i < id.size() ; i++){
+           change  = check_revision(id[i] , revid[i]);
+               qDebug() << id[i];
+               qDebug() << revid[i];
+           if(change == true)
+           {
+               qDebug() << " same";
+           }
+           else
+           {
+               qDebug() << "need update";
+
+           }
+        }
+
     }
 
