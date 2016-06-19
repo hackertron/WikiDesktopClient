@@ -11,8 +11,8 @@ import QtQuick 2.5
 Window {
     id:root
     visible: true
-    width : Screen.width /5
-    height: Screen.height/5
+    width : Screen.width /3
+    height: Screen.height/3
     color : "black"
 
     MessageDialog {
@@ -38,7 +38,7 @@ Column{
         id : view
 
         width: root.width
-        height: root.height /5
+        height: root.height /6
         text: "LOAD PAGE"
 
 
@@ -55,7 +55,7 @@ Column{
     Button{
         id : save
         width: root.width
-        height: root.height /5
+        height: root.height /6
         text: "SAVE PAGE"
         onClicked: {
                 msg.visible = true
@@ -68,8 +68,8 @@ Column{
     Button{
         id : local
         width: root.width
-        height: root.height /5
-        text: "local PAGE"
+        height: root.height /6
+        text: "LOCAL PAGE"
         onClicked: {
 
             var component= Qt.createComponent("local.qml")
@@ -82,7 +82,7 @@ Column{
     Button{
         id : del
         width: root.width
-        height: root.height /5
+        height: root.height /6
         text: "DELETE PAGE"
         onClicked: {
             msg.title = "Deleted"
@@ -93,9 +93,18 @@ Column{
         }
     }
     Button{
+        id : update
+        width: root.width
+        height: root.height /6
+        text: "UPDATE PAGE"
+        onClicked: {
+            dbm.update()
+        }
+    }
+    Button{
         id : exit
         width: root.width
-        height: root.height /5
+        height: root.height /6
         text: "EXIT"
         onClicked: {
             Qt.quit();
