@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtQml>
 #include <QObject>
 #include <QtSql>
 #include <QSqlDatabase>
@@ -16,11 +17,18 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QtWebEngine::initialize();
 
-    QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    qmlRegisterType<dbmanager>("en.wtl.org", 1, 0, "dbmanager");
+        dbmanager dbman;
+        QQmlApplicationEngine engine;
+        engine.rootContext()->setContextProperty( "dbman", &dbman );
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    QScopedPointer <dbmanager> dbm(new dbmanager);
-    engine.rootContext()->setContextProperty("dbm",dbm.data());
+   // QQmlApplicationEngine engine;
+   // engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+   // QScopedPointer <dbmanager> dbm(new dbmanager);
+   // engine.rootContext()->setContextProperty("dbm",dbm.data());
+
 
 
     QDir databasePath;
@@ -56,12 +64,13 @@ int main(int argc, char *argv[])
     "`revision_number` INTEGER NOT NULL);"))
   {
       qDebug() << "Dependencies table created";
+
   }
   else
   {
    qDebug() <<query.lastError();
   }
-
+/*
    if( query.exec("CREATE TABLE IF NOT EXISTS `Pages_has_Dependencies`"
                "(`page_ID`	INTEGER NOT NULL,"
               " `depe_ID`	INTEGER NOT NULL,"
@@ -85,8 +94,8 @@ int main(int argc, char *argv[])
    {
     qDebug() <<query.lastError();
    }
-
-
+*/
+   query.clear();
    db.close();
 
    QString styling = "<style type=\"text/css\"> "
@@ -133,5 +142,9 @@ int main(int argc, char *argv[])
           QTextStream stream(&file);
           stream << styling << endl;
       }
+
+
+
+
     return app.exec();
 }
