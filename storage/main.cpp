@@ -8,19 +8,27 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <dbmanager.h>
+#include <QtWebEngine/QtWebEngine>
 
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-
+    QtWebEngine::initialize();
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+   // engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QScopedPointer <dbmanager> dbm(new dbmanager);
     engine.rootContext()->setContextProperty("dbm",dbm.data());
 
+    qmlRegisterType<dbmanager>("en.wtl.org", 1, 0, "dbmanager");
+    dbmanager dbman ;
+    QQmlApplicationEngine engin;
+    engin.rootContext()->setContextProperty( "dbman", &dbman );
+
+
+        engin.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QDir databasePath;
 
@@ -52,9 +60,10 @@ int main(int argc, char *argv[])
   if(query.exec("CREATE TABLE IF NOT EXISTS `Dependencies` ("
      "`depe_ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
     " `depe_fileName` VARCHAR(45) NOT NULL,"
-    "`revision_num` INTEGER NOT NULL);"))
+    "`revision_number` INTEGER NOT NULL);"))
   {
       qDebug() << "Dependencies table created";
+
   }
   else
   {
@@ -85,6 +94,56 @@ int main(int argc, char *argv[])
     qDebug() <<query.lastError();
    }
 
+   query.clear();
    db.close();
+
+   QString styling = "<style type=\"text/css\"> "
+
+             " p{"
+
+                "  display: block;"
+             " -webkit-margin-before: 1em; "
+             " -webkit-margin-after: 1em; "
+             " -webkit-margin-start: 0px; "
+             " -webkit-margin-end: 0px; "
+
+             " } "
+
+
+           " body { "
+          "    font-family: 'Source Sans Pro', sans-serif; "
+           "   } "
+
+       "   pre { "
+        "      display: block; "
+         "     padding: 9.5px; "
+         "     margin: 0 0 10px; "
+          "    font-size: 13px; "
+           "   line-height: 1.42857143; "
+           "   word-break: break-all; "
+           "   word-wrap: break-word; "
+            "  color: #333; "
+          "    background-color: #f5f5f5; "
+           "   border: 1px solid #ccc; "
+           "   border-radius: 4px; "
+       "   } "
+
+
+
+        "  </style> "
+           "";
+
+
+   QString filename = "main.css";
+
+  QFile file(filename);
+      if (file.open(QIODevice::ReadWrite)) {
+          QTextStream stream(&file);
+          stream << styling << endl;
+      }
+
+
+
+
     return app.exec();
 }
