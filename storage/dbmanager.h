@@ -14,7 +14,7 @@ public:
     explicit dbmanager(QObject *parent = 0);
 
     Q_INVOKABLE QString add(QString p_url);
-    Q_INVOKABLE void del();
+    Q_INVOKABLE QString del(QString pageid);
     Q_INVOKABLE void update();
 
 
