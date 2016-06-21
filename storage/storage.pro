@@ -1,12 +1,12 @@
 TEMPLATE = app
 
-QT += qml quick sql network webkit
+QT += qml quick sql network webkit webkitwidgets widgets
+QT += webengine
 
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    dbmanager.cpp \
-    downloader.cpp
+    dbmanager.cpp
 
 RESOURCES += qml.qrc
 
@@ -17,5 +17,4 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    dbmanager.h \
-    downloader.h
+    dbmanager.h
