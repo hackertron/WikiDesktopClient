@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtQml>
 #include <QObject>
 #include <QtSql>
 #include <QSqlDatabase>
@@ -16,19 +17,19 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QtWebEngine::initialize();
 
-    QQmlApplicationEngine engine;
+    qmlRegisterType<dbmanager>("en.wtl.org", 1, 0, "dbmanager");
+        dbmanager dbman;
+        QQmlApplicationEngine engine;
+        engine.rootContext()->setContextProperty( "dbman", &dbman );
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+   // QQmlApplicationEngine engine;
    // engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    QScopedPointer <dbmanager> dbm(new dbmanager);
-    engine.rootContext()->setContextProperty("dbm",dbm.data());
-
-    qmlRegisterType<dbmanager>("en.wtl.org", 1, 0, "dbmanager");
-    dbmanager dbman ;
-    QQmlApplicationEngine engin;
-    engin.rootContext()->setContextProperty( "dbman", &dbman );
+   // QScopedPointer <dbmanager> dbm(new dbmanager);
+   // engine.rootContext()->setContextProperty("dbm",dbm.data());
 
 
-        engin.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QDir databasePath;
 
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
   {
    qDebug() <<query.lastError();
   }
-
+/*
    if( query.exec("CREATE TABLE IF NOT EXISTS `Pages_has_Dependencies`"
                "(`page_ID`	INTEGER NOT NULL,"
               " `depe_ID`	INTEGER NOT NULL,"
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
    {
     qDebug() <<query.lastError();
    }
-
+*/
    query.clear();
    db.close();
 
