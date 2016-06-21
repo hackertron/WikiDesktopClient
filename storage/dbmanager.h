@@ -13,8 +13,11 @@ class dbmanager : public QObject
 public:
     explicit dbmanager(QObject *parent = 0);
 
-    Q_INVOKABLE void add();
+    Q_INVOKABLE QString add(QString p_url);
     Q_INVOKABLE void del();
+    Q_INVOKABLE void update();
+
+
     
 
 signals:
@@ -23,10 +26,13 @@ private:
     QNetworkReply *m_network_reply;
     QFile *m_file;
     QString filename;
-    QString imageDownloadPath;
+
+
 
 public :
     void doDownload(const QVariant &v);
+    QString imageDownloadPath;
+
 
 private slots:
 
