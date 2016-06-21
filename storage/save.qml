@@ -6,21 +6,23 @@ import en.wtl.org 1.0
 
 ApplicationWindow {
     visible: true
-    width: 60
-    height: 40
-    color: "black"
+    width: 320
+    height: 240
+    color : "black"
+    opacity: 0.5
 
     Dialog {
         id: myDialog
         visible: false
-        title: "Enter page Title"
+        title: "Add Page"
         contentItem: Rectangle {
-            color: "orange"
+           // color: "orange"
+
             implicitWidth: 400
             implicitHeight: 100
             Column {
                 Text {
-                    text: "Enter title!"
+                    text: "Enter Page Name!"
                 }
                 TextField {
                     id: myTextField
@@ -50,6 +52,8 @@ ApplicationWindow {
             text: "Add"
             onClicked: myDialog.open();
         }
+
+
         Text {
             id: responseText
         }
