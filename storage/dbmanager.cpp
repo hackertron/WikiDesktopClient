@@ -17,7 +17,6 @@
 #include <QString>
 #include <QTextStream>
 #include <QRegularExpression>
-#include "downloader.h"
 #include <QStringList>
 #include <QFileInfo>
 #include <QVector>
@@ -28,12 +27,16 @@ int current= 0;
 QStringList down_links;
 QString imgpath;
 int revision_number = 0;
-int count = 1;
+
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
 
 }
+
+
+
+
 
 bool del_from_db(QString id,int revid)
 {
@@ -73,7 +76,7 @@ bool del_from_db(QString id,int revid)
 
     if(query.exec())
     {
-        qDebug() << "deleted from table Pages";
+        qDebug() << "deleted from table Dependencies";
         done = true;
 
     }
@@ -140,14 +143,14 @@ bool add_depend(QString filename , int revision_number)
 
     QSqlQuery query;
 
-    query.prepare("INSERT INTO Dependencies (depe_ID,depe_fileName,revision_number) "
-                  "VALUES (? , ? , ?)");
+    query.prepare("INSERT INTO Dependencies (depe_fileName,revision_number) "
+                  "VALUES (:depe_filename , :revision_number )");
 
 
-    query.bindValue(0,count);
-    query.bindValue(1,filename);
-    query.bindValue(2, revision_number);
-    ++count ;
+
+    query.bindValue(":depe_filename",filename);
+    query.bindValue(":revision_number", revision_number);
+
 
 
     if(query.exec())
@@ -361,54 +364,8 @@ void dbmanager::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
     qDebug()<<bytesRead<<totalBytes;
 }
 
-
-void dbmanager::add()
+void save_file(QString text , int pageid , int revid)
 {
-
-    QString text ;
-    int pageid , revid;
-
-
-
-    // create custom temporary event loop on stack
-    QEventLoop eventLoop;
-
-    // "quit()" the event-loop, when the network request "finished()"
-    QNetworkAccessManager mgr;
-    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
-
-    // the HTTP request
-    QNetworkRequest req( QUrl( QString("http://en.wikitolearn.org/api.php?action=parse&page=Linear_Algebra/Relations&format=json") ) );
-    QNetworkReply *reply = mgr.get(req);
-    eventLoop.exec();
-
-    if (reply->error() == QNetworkReply::NoError) {
-        //success
-        //qDebug() << "Success" <<reply->readAll();
-        QString   html = (QString)reply->readAll();
-        QJsonDocument jsonResponse = QJsonDocument::fromJson(html.toUtf8());
-
-        QJsonObject jsonObj = jsonResponse.object();
-
-
-        text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
-        pageid = jsonObj["parse"].toObject()["pageid"].toInt();
-        revid = jsonObj["parse"].toObject()["revid"].toInt();
-
-        //clean the result from the API
-        text = clean_text(text);
-        //  qDebug() << text;
-        qDebug() <<pageid;
-
-        delete reply;
-    }
-
-    else {
-        //failure
-        qDebug() << "Failure" <<reply->errorString();
-        delete reply;
-    }
-
     if(!check_links(text))
     {
         QDir dir;
@@ -426,6 +383,8 @@ void dbmanager::add()
             QFile file(filename);
             file.open(QIODevice::WriteOnly | QIODevice::Text);
             QTextStream out(&file);
+
+            text = "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">" +text;
             out << text;
 
             // optional, as QFile destructor will already do it:
@@ -455,17 +414,18 @@ void dbmanager::add()
         else {
 
             QDir dir;
-            imageDownloadPath = QString::number(pageid);
-            imgpath =imageDownloadPath;
+            dbmanager d;
+            d.imageDownloadPath = QString::number(pageid);
+            imgpath =d.imageDownloadPath;
 
-            if(QDir(imageDownloadPath).exists())
+            if(QDir(d.imageDownloadPath).exists())
             {
                 qDebug() << " already exist ";
             }
             else{
-                dir.mkdir(imageDownloadPath);
+                dir.mkdir(d.imageDownloadPath);
 
-                QString filename = imageDownloadPath+".html";
+                QString filename = d.imageDownloadPath+".html";
 
                 QFile file(filename);
                 file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -499,17 +459,125 @@ void dbmanager::add()
             }
 
         }
+}
+
+void del_file(QString pageid)
+{
+    QDir dir ;
+
+    if(QDir(pageid).exists())
+    {
+        dir = pageid;
+        dir.removeRecursively();
+
+    }
+    else{
+        qDebug() << "cannot delete or folder does not exist";
+
+}
+}
+
+
+QString dbmanager::add(QString p_url)
+{
+
+    QString text ;
+    int pageid , revid;
+
+    QString requested_url = "http://en.wikitolearn.org/api.php?action=parse&page="+p_url+"&format=json";
+
+    // create custom temporary event loop on stack
+    QEventLoop eventLoop;
+
+    // "quit()" the event-loop, when the network request "finished()"
+    QNetworkAccessManager mgr;
+    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+    // the HTTP request
+    QNetworkRequest req( requested_url );
+    QNetworkReply *reply = mgr.get(req);
+    eventLoop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        //success
+        //qDebug() << "Success" <<reply->readAll();
+        QString   html = (QString)reply->readAll();
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(html.toUtf8());
+
+        QJsonObject jsonObj = jsonResponse.object();
+
+
+        text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
+        pageid = jsonObj["parse"].toObject()["pageid"].toInt();
+        revid = jsonObj["parse"].toObject()["revid"].toInt();
+
+        //clean the result from the API
+        text = clean_text(text);
+        //  qDebug() << text;
+        qDebug() <<pageid;
+
+        delete reply;
+    }
+
+    else {
+        //failure
+        qDebug() << "Failure" <<reply->errorString();
+        delete reply;
+    }
+
+    // ******************* here ****************
+
+    save_file(text , pageid , revid);
+
+    // ***************************
+
+    static auto i = 0;
+       return QString("%1: %2").arg(++i).arg(p_url);
 
 
     }
 
-    void dbmanager::del()
+    QString dbmanager::del(QString pageid)
     {
         qDebug() <<"DELETION CODE GOES HERE";
+        del_file(pageid);
+
+        QDir databasePath;
+        QString path = databasePath.currentPath()+"WTL.db";
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+        db.setDatabaseName(path);
+        if(!db.open())
+        {
+            qDebug() <<"error in opening DB";
+        }
+        else
+        {
+            qDebug() <<"connected to DB" ;
+
+        }
+        int revid ;
+        QSqlQuery query;
+
+      query.prepare("Select page_revision from Pages where page_ID = :id");
+      query.bindValue(":id", pageid);
+      query.exec();
+
+      if (query.next()) {
+           revid = query.value(0).toInt();
+
+      }
+      db.close();
+
+       del_from_db(pageid,revid);
+
+        static auto i = 0;
+           return QString("%1: %2").arg(++i).arg(pageid);
+
     }
 
     bool check_revision(QString id , int revision_number)
     {
+        int pageid;
 
         QEventLoop eventLoop;
 
@@ -532,6 +600,7 @@ void dbmanager::add()
             QJsonObject jsonObj = jsonResponse.object();
 
             int  revid = jsonObj["parse"].toObject()["revid"].toInt();
+            pageid = jsonObj["parse"].toObject()["pageid"].toInt();
             qDebug() << jsonObj["parse"].toObject()["title"].toString();
 
 
@@ -555,11 +624,15 @@ void dbmanager::add()
                 {
                     qDebug() << "error in deletion from DB";
                 }
-
+            QString pid = QString::number(pageid);
+            del_file(pid);
+            save_file( text ,  pageid ,  revision_number);
 
                 
             }
+
     }
+
 
     }
 
