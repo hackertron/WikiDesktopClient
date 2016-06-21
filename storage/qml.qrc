@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Mywebview.qml</file>
+        <file>local.qml</file>
+        <file>save.qml</file>
+        <file>delete.qml</file>
+    </qresource>
+</RCC>
