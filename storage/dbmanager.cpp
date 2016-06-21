@@ -19,19 +19,92 @@
 #include <QRegularExpression>
 #include "downloader.h"
 #include <QStringList>
-
 #include <QFileInfo>
+#include <QVector>
+
 
 
 int current= 0;
 QStringList down_links;
 QString imgpath;
 int revision_number = 0;
-int count  = 1;
+int count = 1;
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
 
+}
+
+
+
+
+
+bool del_from_db(QString id,int revid)
+{
+    bool done;
+    QDir databasePath;
+    QString path = databasePath.currentPath()+"WTL.db";
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+    db.setDatabaseName(path);
+    if(!db.open())
+    {
+        qDebug() <<"error in opening DB";
+    }
+    else
+    {
+        qDebug() <<"connected to DB" ;
+
+    }
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM Pages WHERE page_ID = '" + id + "'");
+
+
+
+    if(query.exec())
+    {
+        qDebug() << "deleted from table Pages";
+        done = true;
+
+    }
+    else
+    {
+        qDebug() << query.lastError();
+
+    }
+    query.prepare("DELETE FROM Dependencies WHERE revision_number = '" + QString::number(revid) + "'");
+
+
+    if(query.exec())
+    {
+        qDebug() << "deleted from table Pages";
+        done = true;
+
+    }
+    else
+    {
+        qDebug() << query.lastError();
+
+    }
+    if(done == true)
+        return true;
+    else
+        return false;
+
+
+}
+
+QString clean_text(QString text)
+{
+    text = text.replace("\n","");
+    text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
+    text = text.replace("&amp;","&");
+    text = text.replace("MathShowImage&amp;", "MathShowImage&");
+    text = text.replace("mode=mathml&#39;", "mode=mathml""");
+    text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
+    text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
+    text = text.replace("&mode=mathml);" , "&mode=mathml\">");
+    return(text);
 }
 
 bool check_links(QString text)
@@ -78,16 +151,19 @@ bool add_depend(QString filename , int revision_number)
     query.bindValue(0,count);
     query.bindValue(1,filename);
     query.bindValue(2, revision_number);
-    ++count;
+    ++count ;
+
 
     if(query.exec())
     {
         qDebug() << "done";
+        db.close();
         return(true);
     }
     else
     {
         qDebug() << query.lastError();
+        db.close();
 
     }
     return (false);
@@ -124,10 +200,12 @@ bool add_in_db(int pageid , int revid)
     {
         qDebug() << "done";
         return(true);
+        db.close();
     }
     else
     {
         qDebug() << query.lastError();
+        db.close();
 
     }
     return (false);
@@ -136,7 +214,7 @@ bool add_in_db(int pageid , int revid)
 bool save_images(QString filename)
 {
     QString content , newpath , style;
-    qDebug() << filename +"html filename ";
+    qDebug() << filename +" <- html filename ";
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -157,7 +235,9 @@ bool save_images(QString filename)
             down_links << down_link;  //prepare list of downloads
             //start downloading images
             QString d = content.replace("&mode=mathml\"",".svg"); //clean img src in local html file
-            newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",imgpath+"/"); // clean img src in local html file and prepare the local path those are to be saved in html file
+            qDebug() << imgpath ;
+           // reaches here too
+            newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",""); // clean img src in local html file and prepare the local path those are to be saved in html file
 
         }
 
@@ -189,10 +269,23 @@ bool save_images(QString filename)
 
         file.close();
 
+        // move html file to their respective folder
+        QString temp_name = filename;
+       QString new_name = temp_name.replace(".html","");
+       QString css_path = new_name;
+        new_name = new_name + "/" + filename;
+        file.rename(filename,new_name);
+        css_path = css_path + "/main.css";
+        file.copy("main.css",css_path);
+
     }
 
-    dbmanager *d = new dbmanager(0) ;
-    d->doDownload(down_links);
+   // dbmanager *d = new dbmanager(0) ;
+   // d->doDownload(down_links);
+
+
+    dbmanager down ;
+    down.doDownload(down_links);
 
     return true ;
 
@@ -277,59 +370,8 @@ void dbmanager::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
     qDebug()<<bytesRead<<totalBytes;
 }
 
-
-void dbmanager::add()
+void save_file(QString text , int pageid , int revid)
 {
-
-    QString text ;
-    int pageid , revid;
-
-
-
-    // create custom temporary event loop on stack
-    QEventLoop eventLoop;
-
-    // "quit()" the event-loop, when the network request "finished()"
-    QNetworkAccessManager mgr;
-    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
-
-    // the HTTP request
-    QNetworkRequest req( QUrl( QString("http://en.wikitolearn.org/api.php?action=parse&page=Linear%20Algebra/Sets&format=json") ) );
-    QNetworkReply *reply = mgr.get(req);
-    eventLoop.exec();
-
-    if (reply->error() == QNetworkReply::NoError) {
-        //success
-        //qDebug() << "Success" <<reply->readAll();
-        QString   html = (QString)reply->readAll();
-        QJsonDocument jsonResponse = QJsonDocument::fromJson(html.toUtf8());
-
-        QJsonObject jsonObj = jsonResponse.object();
-
-
-        text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
-        pageid = jsonObj["parse"].toObject()["pageid"].toInt();
-        revid = jsonObj["parse"].toObject()["revid"].toInt();
-        text = text.replace("\n","");
-        text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
-        text = text.replace("&amp;","&");
-        text = text.replace("MathShowImage&amp;", "MathShowImage&");
-        text = text.replace("mode=mathml&#39;", "mode=mathml""");
-        text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
-        text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
-        text = text.replace("&mode=mathml);" , "&mode=mathml\">");
-        //  qDebug() << text;
-        qDebug() <<pageid;
-
-        delete reply;
-    }
-
-    else {
-        //failure
-        qDebug() << "Failure" <<reply->errorString();
-        delete reply;
-    }
-
     if(!check_links(text))
     {
         QDir dir;
@@ -351,6 +393,15 @@ void dbmanager::add()
 
             // optional, as QFile destructor will already do it:
             file.close();
+            // move html file to their respective folder
+            QString temp_name = filename;
+           QString new_name = temp_name.replace(".html","");
+           QString css_path = new_name;
+            new_name = new_name + "/" + filename;
+            file.rename(filename,new_name);
+            css_path = css_path + "/main.css";
+            file.copy("main.css",css_path);
+
             bool success = add_in_db(pageid,revid);
             if(success == true)
             {
@@ -367,17 +418,19 @@ void dbmanager::add()
         else {
 
             QDir dir;
-            imageDownloadPath = QString::number(pageid);
-            imgpath =imageDownloadPath;
+            dbmanager d;
+            d.imageDownloadPath = QString::number(pageid);
+            imgpath =d.imageDownloadPath;
 
-            if(QDir(imageDownloadPath).exists())
+            if(QDir(d.imageDownloadPath).exists())
             {
                 qDebug() << " already exist ";
             }
             else{
-                dir.mkdir(imageDownloadPath);
+                dir.mkdir(d.imageDownloadPath);
 
-                QString filename = imageDownloadPath+".html";
+                QString filename = d.imageDownloadPath+".html";
+
                 QFile file(filename);
                 file.open(QIODevice::WriteOnly | QIODevice::Text);
                 QTextStream out(&file);
@@ -410,6 +463,79 @@ void dbmanager::add()
             }
 
         }
+}
+
+void del_file(int pageid)
+{
+    QDir dir ;
+    QString Folder_name = QString::number(pageid);
+    if(QDir(Folder_name).exists())
+    {
+        dir = Folder_name;
+        dir.removeRecursively();
+
+    }
+    else{
+        qDebug() << "cannot delete or folder does not exist";
+
+}
+}
+
+
+QString dbmanager::add(QString p_url)
+{
+
+    QString text ;
+    int pageid , revid;
+
+   QString requested_url = "http://en.wikitolearn.org/api.php?action=parse&page="+p_url+"&format=json";
+
+
+
+    // create custom temporary event loop on stack
+    QEventLoop eventLoop;
+
+    // "quit()" the event-loop, when the network request "finished()"
+    QNetworkAccessManager mgr;
+    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+    // the HTTP request
+    QNetworkRequest req( requested_url );
+    QNetworkReply *reply = mgr.get(req);
+    eventLoop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        //success
+        //qDebug() << "Success" <<reply->readAll();
+        QString   html = (QString)reply->readAll();
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(html.toUtf8());
+
+        QJsonObject jsonObj = jsonResponse.object();
+
+
+        text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
+        pageid = jsonObj["parse"].toObject()["pageid"].toInt();
+        revid = jsonObj["parse"].toObject()["revid"].toInt();
+
+        //clean the result from the API
+        text = clean_text(text);
+        //  qDebug() << text;
+        qDebug() <<pageid;
+
+        delete reply;
+    }
+
+    else {
+        //failure
+        qDebug() << "Failure" <<reply->errorString();
+        delete reply;
+    }
+
+    // ******************* here ****************
+
+    save_file(text , pageid , revid);
+
+    // ***************************
 
 
     }
@@ -417,6 +543,119 @@ void dbmanager::add()
     void dbmanager::del()
     {
         qDebug() <<"DELETION CODE GOES HERE";
+        del_file(295);
+        //del_from_db(id,revid);
     }
 
+    bool check_revision(QString id , int revision_number)
+    {
+        int pageid;
+
+        QEventLoop eventLoop;
+
+        // "quit()" the event-loop, when the network request "finished()"
+        QNetworkAccessManager mg;
+        QObject::connect(&mg, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+        // the HTTP request
+        QString url = "http://en.wikitolearn.org/api.php?action=parse&pageid="+id+"&format=json";
+        QNetworkRequest re( ( url ) );
+        QNetworkReply *reply = mg.get(re);
+        eventLoop.exec();
+
+        if (reply->error() == QNetworkReply::NoError) {
+            //success
+            //qDebug() << "Success" <<reply->readAll();
+            QString   html = (QString)reply->readAll();
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(html.toUtf8());
+
+            QJsonObject jsonObj = jsonResponse.object();
+
+            int  revid = jsonObj["parse"].toObject()["revid"].toInt();
+            pageid = jsonObj["parse"].toObject()["pageid"].toInt();
+            qDebug() << jsonObj["parse"].toObject()["title"].toString();
+
+
+            if(revision_number == revid)
+            {
+                delete reply;
+                return true ;
+            }
+            else
+            {
+                qDebug() << "update page";
+                QString text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
+                text = clean_text(text);
+                bool del = del_from_db(id,revid);
+                //check if deletion was successfull
+                if(del == true)
+                {
+                    qDebug() << "deletion from DB done";
+                }
+                else
+                {
+                    qDebug() << "error in deletion from DB";
+                }
+
+            del_file(pageid);
+            save_file( text ,  pageid ,  revision_number);
+
+                
+            }
+
+    }
+
+
+    }
+
+
+
+    void dbmanager::update()
+    {
+
+        QDir databasePath;
+        QString path = databasePath.currentPath()+"WTL.db";
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+        db.setDatabaseName(path);
+        if(!db.open())
+        {
+            qDebug() <<"error in opening DB";
+        }
+        else
+        {
+            qDebug() <<"connected to DB" ;
+        }
+
+
+        bool change = false ;
+        QSqlQuery count;
+
+        QVector<QString> id ;
+        QVector<int> revid;
+
+
+         QSqlQuery query("SELECT page_ID , page_revision FROM Pages");
+           while (query.next()) {
+                QString i = query.value(0).toString();
+                id.push_back(i);
+               int r = query.value(1).toInt();
+               revid.push_back(r);
+
+           }
+           for(int i = 0 ; i < id.size() ; i++){
+           change  = check_revision(id[i] , revid[i]);
+               qDebug() << id[i];
+               qDebug() << revid[i];
+           if(change == true)
+           {
+               qDebug() << " same";
+           }
+           else
+           {
+               qDebug() << "need update";
+
+           }
+        }
+
+    }
 
