@@ -58,11 +58,9 @@ Column{
         height: root.height /6
         text: "SAVE PAGE"
         onClicked: {
-
             var component= Qt.createComponent("save.qml")
-                        var local_win = component.createObject(root)
-                        local_win.show()
-             msg.visible = true
+            var loadwin = component.createObject(root)
+            loadwin.show()
 
                 
         }
@@ -88,11 +86,9 @@ Column{
         height: root.height /6
         text: "DELETE PAGE"
         onClicked: {
-            msg.title = "Deleted"
-            msg.text = "Page has been deleted"
-            msg.icon = StandardIcon.Warning
-            msg.visible = true
-            dbm.del()
+            var component= Qt.createComponent("delete.qml")
+                        var local_win = component.createObject(root)
+                        local_win.show()
         }
     }
     Button{
@@ -101,7 +97,7 @@ Column{
         height: root.height /6
         text: "UPDATE PAGE"
         onClicked: {
-            dbm.update()
+            dbman.update()
         }
     }
     Button{
