@@ -17,7 +17,6 @@
 #include <QString>
 #include <QTextStream>
 #include <QRegularExpression>
-#include "downloader.h"
 #include <QStringList>
 #include <QFileInfo>
 #include <QVector>
@@ -28,7 +27,7 @@ int current= 0;
 QStringList down_links;
 QString imgpath;
 int revision_number = 0;
-int count = 1;
+
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
@@ -77,7 +76,7 @@ bool del_from_db(QString id,int revid)
 
     if(query.exec())
     {
-        qDebug() << "deleted from table Pages";
+        qDebug() << "deleted from table Dependencies";
         done = true;
 
     }
@@ -144,14 +143,14 @@ bool add_depend(QString filename , int revision_number)
 
     QSqlQuery query;
 
-    query.prepare("INSERT INTO Dependencies (depe_ID,depe_fileName,revision_number) "
-                  "VALUES (? , ? , ?)");
+    query.prepare("INSERT INTO Dependencies (depe_fileName,revision_number) "
+                  "VALUES (:depe_filename , :revision_number )");
 
 
-    query.bindValue(0,count);
-    query.bindValue(1,filename);
-    query.bindValue(2, revision_number);
-    ++count ;
+
+    query.bindValue(":depe_filename",filename);
+    query.bindValue(":revision_number", revision_number);
+
 
 
     if(query.exec())
@@ -236,7 +235,6 @@ bool save_images(QString filename)
             //start downloading images
             QString d = content.replace("&mode=mathml\"",".svg"); //clean img src in local html file
             qDebug() << imgpath ;
-           // reaches here too
             newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",""); // clean img src in local html file and prepare the local path those are to be saved in html file
 
         }
@@ -280,12 +278,8 @@ bool save_images(QString filename)
 
     }
 
-   // dbmanager *d = new dbmanager(0) ;
-   // d->doDownload(down_links);
-
-
-    dbmanager down ;
-    down.doDownload(down_links);
+    dbmanager *d = new dbmanager(0) ;
+    d->doDownload(down_links);
 
     return true ;
 
@@ -389,6 +383,8 @@ void save_file(QString text , int pageid , int revid)
             QFile file(filename);
             file.open(QIODevice::WriteOnly | QIODevice::Text);
             QTextStream out(&file);
+
+            text = "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">" +text;
             out << text;
 
             // optional, as QFile destructor will already do it:
@@ -465,13 +461,13 @@ void save_file(QString text , int pageid , int revid)
         }
 }
 
-void del_file(int pageid)
+void del_file(QString pageid)
 {
     QDir dir ;
-    QString Folder_name = QString::number(pageid);
-    if(QDir(Folder_name).exists())
+
+    if(QDir(pageid).exists())
     {
-        dir = Folder_name;
+        dir = pageid;
         dir.removeRecursively();
 
     }
@@ -488,9 +484,7 @@ QString dbmanager::add(QString p_url)
     QString text ;
     int pageid , revid;
 
-   QString requested_url = "http://en.wikitolearn.org/api.php?action=parse&page="+p_url+"&format=json";
-
-
+    QString requested_url = "http://en.wikitolearn.org/api.php?action=parse&page="+p_url+"&format=json";
 
     // create custom temporary event loop on stack
     QEventLoop eventLoop;
@@ -537,14 +531,48 @@ QString dbmanager::add(QString p_url)
 
     // ***************************
 
+    static auto i = 0;
+       return QString("%1: %2").arg(++i).arg(p_url);
+
 
     }
 
-    void dbmanager::del()
+    QString dbmanager::del(QString pageid)
     {
         qDebug() <<"DELETION CODE GOES HERE";
-        del_file(295);
-        //del_from_db(id,revid);
+        del_file(pageid);
+
+        QDir databasePath;
+        QString path = databasePath.currentPath()+"WTL.db";
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
+        db.setDatabaseName(path);
+        if(!db.open())
+        {
+            qDebug() <<"error in opening DB";
+        }
+        else
+        {
+            qDebug() <<"connected to DB" ;
+
+        }
+        int revid ;
+        QSqlQuery query;
+
+      query.prepare("Select page_revision from Pages where page_ID = :id");
+      query.bindValue(":id", pageid);
+      query.exec();
+
+      if (query.next()) {
+           revid = query.value(0).toInt();
+
+      }
+      db.close();
+
+       del_from_db(pageid,revid);
+
+        static auto i = 0;
+           return QString("%1: %2").arg(++i).arg(pageid);
+
     }
 
     bool check_revision(QString id , int revision_number)
@@ -596,8 +624,8 @@ QString dbmanager::add(QString p_url)
                 {
                     qDebug() << "error in deletion from DB";
                 }
-
-            del_file(pageid);
+            QString pid = QString::number(pageid);
+            del_file(pid);
             save_file( text ,  pageid ,  revision_number);
 
                 
