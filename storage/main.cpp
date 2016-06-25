@@ -34,9 +34,9 @@ int main(int argc, char *argv[])
     QDir databasePath;
 
 
-    QString path = databasePath.currentPath()+"WTL.db";
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName("WTL.db");
     if(!db.open())
     {
         qDebug() <<"error";
@@ -70,31 +70,7 @@ int main(int argc, char *argv[])
   {
    qDebug() <<query.lastError();
   }
-/*
-   if( query.exec("CREATE TABLE IF NOT EXISTS `Pages_has_Dependencies`"
-               "(`page_ID`	INTEGER NOT NULL,"
-              " `depe_ID`	INTEGER NOT NULL,"
-               "PRIMARY KEY(page_ID,depe_ID),"
-               "INDEX `fk_Pages_has_Dependencies_Dependencies1_idx` (`depe_ID` ASC),"
-               "INDEX `fk_Pages_has_Dependencies_Pages_idx` (`page_ID` ASC),"
-               "CONSTRAINT `fk_Pages_has_Dependencies_Pages`"
-               "FOREIGN KEY (`page_ID`)"
-               "REFERENCES `Pages` (`page_ID`)"
-               "ON DELETE NO ACTION"
-               "ON UPDATE NO ACTION,"
-               "CONSTRAINT `fk_Pages_has_Dependencies_Dependencies1`"
-               "FOREIGN KEY (`depe_ID`)"
-               "REFERENCES `Dependencies` (`depe_ID`)"
-               "ON DELETE NO ACTION"
-               "ON UPDATE NO ACTION);"))
-   {
-       qDebug() << "Pages_has_Dependencies table created";
-   }
-   else
-   {
-    qDebug() <<query.lastError();
-   }
-*/
+
    query.clear();
    db.close();
 
