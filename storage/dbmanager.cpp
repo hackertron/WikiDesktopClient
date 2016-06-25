@@ -42,9 +42,9 @@ bool del_from_db(QString id,int revid)
 {
     bool done;
     QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName("WTL.db");
     if(!db.open())
     {
         qDebug() <<"error in opening DB";
@@ -103,6 +103,7 @@ QString clean_text(QString text)
     text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
     text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
     text = text.replace("&mode=mathml);" , "&mode=mathml\">");
+    text = text.replace("src=\"//pool.wikitolearn.org" , "src=\"http://pool.wikitolearn.org");
     return(text);
 }
 
@@ -129,9 +130,9 @@ bool check_links(QString text)
 bool add_depend(QString filename , int revision_number)
 {
     QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName("WTL.db");
     if(!db.open())
     {
         qDebug() <<"error in opening DB";
@@ -176,9 +177,9 @@ bool add_in_db(int pageid , int revid)
 {
     revision_number = revid ;
     QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName("WTL.db");
     if(!db.open())
     {
         qDebug() <<"error in opening DB";
@@ -543,9 +544,9 @@ QString dbmanager::add(QString p_url)
         del_file(pageid);
 
         QDir databasePath;
-        QString path = databasePath.currentPath()+"WTL.db";
+
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-        db.setDatabaseName(path);
+        db.setDatabaseName("WTL.db");
         if(!db.open())
         {
             qDebug() <<"error in opening DB";
@@ -642,9 +643,9 @@ QString dbmanager::add(QString p_url)
     {
 
         QDir databasePath;
-        QString path = databasePath.currentPath()+"WTL.db";
+
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-        db.setDatabaseName(path);
+        db.setDatabaseName("WTL.db");
         if(!db.open())
         {
             qDebug() <<"error in opening DB";
