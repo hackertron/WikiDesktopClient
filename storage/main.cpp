@@ -10,6 +10,7 @@
 #include <QQmlContext>
 #include <dbmanager.h>
 #include <QtWebEngine/QtWebEngine>
+#include <QStandardPaths>
 
 
 int main(int argc, char *argv[])
@@ -23,12 +24,18 @@ int main(int argc, char *argv[])
         engine.rootContext()->setContextProperty( "dbman", &dbman );
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-   // QQmlApplicationEngine engine;
-   // engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-   // QScopedPointer <dbmanager> dbm(new dbmanager);
-   // engine.rootContext()->setContextProperty("dbm",dbm.data());
 
+        QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+         qDebug() << path;
+
+         QDir dir(path);
+         if (!dir.exists())
+             dir.mkpath(path);
+         if (!dir.exists("WTL_appdata"))
+             dir.mkdir("WTL_appdata");
+
+         dir.cd("WTL_appdata");
 
 
     QDir databasePath;
@@ -36,7 +43,7 @@ int main(int argc, char *argv[])
 
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName("WTL.db");
+    db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
     if(!db.open())
     {
         qDebug() <<"error";
@@ -111,16 +118,17 @@ int main(int argc, char *argv[])
            "";
 
 
-   QString filename = "main.css";
-
-  QFile file(filename);
-      if (file.open(QIODevice::ReadWrite)) {
-          QTextStream stream(&file);
-          stream << styling << endl;
-      }
 
 
 
+    QString filename = dir.absoluteFilePath("main.css");
+    qDebug() << filename;
+    QFile file(filename);
+          if (file.open(QIODevice::ReadWrite)) {
+              QTextStream stream(&file);
+              stream << styling << endl;
+          }
 
+    app.setApplicationName("WTL_Client");
     return app.exec();
 }
