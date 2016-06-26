@@ -27,6 +27,8 @@ int current= 0;
 QStringList down_links;
 QString imgpath;
 int revision_number = 0;
+QString data_path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+
 
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
@@ -42,9 +44,11 @@ bool del_from_db(QString id,int revid)
 {
     bool done;
     QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
+    QDir dir(data_path);
+    dir.cd("WTL_appdata");
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
     if(!db.open())
     {
         qDebug() <<"error in opening DB";
@@ -103,6 +107,7 @@ QString clean_text(QString text)
     text = text.replace("<meta class=\"mwe-math-fallback-image-inline\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""   "src=");
     text = text.replace("<meta class=\"mwe-math-fallback-image-display\" aria-hidden=\"true\" style=\"background-image: url(" ,"<img style=\"background-repeat: no-repeat; background-size: 100% 100%; vertical-align: -0.838ex;height: 2.843ex;\""  "src=");
     text = text.replace("&mode=mathml);" , "&mode=mathml\">");
+    text = text.replace("src=\"//pool.wikitolearn.org" , "src=\"http://pool.wikitolearn.org");
     return(text);
 }
 
@@ -129,9 +134,12 @@ bool check_links(QString text)
 bool add_depend(QString filename , int revision_number)
 {
     QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
+
+    QDir dir(data_path);
+    dir.cd("WTL_appdata");
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
     if(!db.open())
     {
         qDebug() <<"error in opening DB";
@@ -176,9 +184,12 @@ bool add_in_db(int pageid , int revid)
 {
     revision_number = revid ;
     QDir databasePath;
-    QString path = databasePath.currentPath()+"WTL.db";
+
+    QDir dir(data_path);
+    dir.cd("WTL_appdata");
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
     if(!db.open())
     {
         qDebug() <<"error in opening DB";
@@ -210,7 +221,7 @@ bool add_in_db(int pageid , int revid)
     return (false);
 }
 
-bool save_images(QString filename)
+bool save_images(QString filename , int pageid)
 {
     QString content , newpath , style;
     qDebug() << filename +" <- html filename ";
@@ -268,13 +279,16 @@ bool save_images(QString filename)
         file.close();
 
         // move html file to their respective folder
-        QString temp_name = filename;
+        QString fname = QString::number(pageid);
+        QDir dir(data_path);
+        dir.cd("WTL_appdata");
+        QString temp_name = dir.absoluteFilePath(filename);
        QString new_name = temp_name.replace(".html","");
        QString css_path = new_name;
-        new_name = new_name + "/" + filename;
+        new_name = new_name + "/" + fname +".html";
         file.rename(filename,new_name);
         css_path = css_path + "/main.css";
-        file.copy("main.css",css_path);
+        file.copy(dir.absoluteFilePath("main.css"),css_path);
 
     }
 
@@ -368,18 +382,21 @@ void save_file(QString text , int pageid , int revid)
 {
     if(!check_links(text))
     {
-        QDir dir;
-        QString Folder_name = QString::number(pageid);
+        QDir dir(data_path);
+        dir.cd("WTL_appdata");
+        QString Folder_name = dir.absoluteFilePath(QString::number(pageid));
+        QString fname = QString::number(pageid);
         if(QDir(Folder_name).exists())
         {
             qDebug() << " already exist ";
 
         }
-        else{
+        else{           
+
+             QDir dir(data_path);
+             dir.cd("WTL_appdata");
             dir.mkdir(Folder_name);
-
-
-            QString filename = Folder_name+".html";
+            QString filename = dir.absoluteFilePath(Folder_name+".html");
             QFile file(filename);
             file.open(QIODevice::WriteOnly | QIODevice::Text);
             QTextStream out(&file);
@@ -390,13 +407,13 @@ void save_file(QString text , int pageid , int revid)
             // optional, as QFile destructor will already do it:
             file.close();
             // move html file to their respective folder
-            QString temp_name = filename;
-           QString new_name = temp_name.replace(".html","");
+            QString temp_name = dir.absoluteFilePath(filename);
+           QString new_name = temp_name.replace(".html","");           
            QString css_path = new_name;
-            new_name = new_name + "/" + filename;
+            new_name = new_name + "/" + fname +".html";
             file.rename(filename,new_name);
-            css_path = css_path + "/main.css";
-            file.copy("main.css",css_path);
+            css_path = css_path + "/main.css";            
+            file.copy(dir.absoluteFilePath("main.css"),css_path);
 
             bool success = add_in_db(pageid,revid);
             if(success == true)
@@ -413,9 +430,11 @@ void save_file(QString text , int pageid , int revid)
 
         else {
 
-            QDir dir;
+
             dbmanager d;
-            d.imageDownloadPath = QString::number(pageid);
+            QDir dir(data_path);
+            dir.cd("WTL_appdata");
+           d.imageDownloadPath = dir.absoluteFilePath(QString::number(pageid));
             imgpath =d.imageDownloadPath;
 
             if(QDir(d.imageDownloadPath).exists())
@@ -444,7 +463,7 @@ void save_file(QString text , int pageid , int revid)
                     qDebug() <<" failed to add in DB ";
                 }
 
-                success = save_images(filename);
+                success = save_images(filename,pageid);
 
                 if(success == true)
                 {
@@ -463,11 +482,14 @@ void save_file(QString text , int pageid , int revid)
 
 void del_file(QString pageid)
 {
-    QDir dir ;
+    QDir dir(data_path);
+    dir.cd("WTL_appdata");
+    QString Folder_name = dir.absoluteFilePath(pageid);
 
-    if(QDir(pageid).exists())
+    if(QDir(Folder_name).exists())
     {
-        dir = pageid;
+        dir = Folder_name;
+        qDebug() << dir ;
         dir.removeRecursively();
 
     }
@@ -543,9 +565,12 @@ QString dbmanager::add(QString p_url)
         del_file(pageid);
 
         QDir databasePath;
-        QString path = databasePath.currentPath()+"WTL.db";
+
+        QDir dir(data_path);
+        dir.cd("WTL_appdata");
+
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-        db.setDatabaseName(path);
+        db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
         if(!db.open())
         {
             qDebug() <<"error in opening DB";
@@ -642,9 +667,12 @@ QString dbmanager::add(QString p_url)
     {
 
         QDir databasePath;
-        QString path = databasePath.currentPath()+"WTL.db";
+
+        QDir dir(data_path);
+        dir.cd("WTL_appdata");
+
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-        db.setDatabaseName(path);
+        db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
         if(!db.open())
         {
             qDebug() <<"error in opening DB";
