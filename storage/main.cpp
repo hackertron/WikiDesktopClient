@@ -10,6 +10,7 @@
 #include <QQmlContext>
 #include <dbmanager.h>
 #include <QtWebEngine/QtWebEngine>
+#include <QStandardPaths>
 
 
 int main(int argc, char *argv[])
@@ -23,20 +24,26 @@ int main(int argc, char *argv[])
         engine.rootContext()->setContextProperty( "dbman", &dbman );
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-   // QQmlApplicationEngine engine;
-   // engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-   // QScopedPointer <dbmanager> dbm(new dbmanager);
-   // engine.rootContext()->setContextProperty("dbm",dbm.data());
 
+        QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+         qDebug() << path;
+
+         QDir dir(path);
+         if (!dir.exists())
+             dir.mkpath(path);
+         if (!dir.exists("WTL_appdata"))
+             dir.mkdir("WTL_appdata");
+
+         dir.cd("WTL_appdata");
 
 
     QDir databasePath;
 
 
-    QString path = databasePath.currentPath()+"WTL.db";
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(path);
+    db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
     if(!db.open())
     {
         qDebug() <<"error";
@@ -70,31 +77,7 @@ int main(int argc, char *argv[])
   {
    qDebug() <<query.lastError();
   }
-/*
-   if( query.exec("CREATE TABLE IF NOT EXISTS `Pages_has_Dependencies`"
-               "(`page_ID`	INTEGER NOT NULL,"
-              " `depe_ID`	INTEGER NOT NULL,"
-               "PRIMARY KEY(page_ID,depe_ID),"
-               "INDEX `fk_Pages_has_Dependencies_Dependencies1_idx` (`depe_ID` ASC),"
-               "INDEX `fk_Pages_has_Dependencies_Pages_idx` (`page_ID` ASC),"
-               "CONSTRAINT `fk_Pages_has_Dependencies_Pages`"
-               "FOREIGN KEY (`page_ID`)"
-               "REFERENCES `Pages` (`page_ID`)"
-               "ON DELETE NO ACTION"
-               "ON UPDATE NO ACTION,"
-               "CONSTRAINT `fk_Pages_has_Dependencies_Dependencies1`"
-               "FOREIGN KEY (`depe_ID`)"
-               "REFERENCES `Dependencies` (`depe_ID`)"
-               "ON DELETE NO ACTION"
-               "ON UPDATE NO ACTION);"))
-   {
-       qDebug() << "Pages_has_Dependencies table created";
-   }
-   else
-   {
-    qDebug() <<query.lastError();
-   }
-*/
+
    query.clear();
    db.close();
 
@@ -135,16 +118,17 @@ int main(int argc, char *argv[])
            "";
 
 
-   QString filename = "main.css";
-
-  QFile file(filename);
-      if (file.open(QIODevice::ReadWrite)) {
-          QTextStream stream(&file);
-          stream << styling << endl;
-      }
 
 
 
+    QString filename = dir.absoluteFilePath("main.css");
+    qDebug() << filename;
+    QFile file(filename);
+          if (file.open(QIODevice::ReadWrite)) {
+              QTextStream stream(&file);
+              stream << styling << endl;
+          }
 
+    app.setApplicationName("WTL_Client");
     return app.exec();
 }
