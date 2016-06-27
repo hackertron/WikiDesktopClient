@@ -18,7 +18,7 @@ public:
     Q_INVOKABLE void update();
 
 
-    
+
 
 signals:
 
