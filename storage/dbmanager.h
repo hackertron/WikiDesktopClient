@@ -27,10 +27,15 @@ private:
     QFile *m_file;
     QString filename;
 
+    QNetworkReply *png_network_reply;
+    QFile *png_file;
+    QString png_filename;
+
 
 
 public :
     void doDownload(const QVariant &v);
+    void png_download(const QVariant &v , const QVariant &n);
     QString imageDownloadPath;
 
 
@@ -38,6 +43,10 @@ private slots:
 
    void downloadFinished();
    void updateDownloadProgress(qint64, qint64  );
+
+   void png_finished();
+   void update_png_download(qint64, qint64  );
+
 
 public slots:
 
