@@ -23,8 +23,10 @@
 
 
 
-int current= 0;
+int current= 0 , png_curr = 0;
 QStringList down_links;
+QStringList png_down_links;
+QStringList png_hash ;
 QString imgpath;
 int revision_number = 0;
 QString data_path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
@@ -223,7 +225,8 @@ bool add_in_db(int pageid , int revid)
 
 bool save_images(QString filename , int pageid)
 {
-    QString content , newpath , style;
+    QString content , newpath ;
+
     qDebug() << filename +" <- html filename ";
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -238,6 +241,9 @@ bool save_images(QString filename , int pageid)
         QRegularExpression link_regex("src=(?<path>.*?)>");
         QRegularExpressionMatchIterator links = link_regex.globalMatch(content);
 
+        QRegularExpression png_regex("src=\"http://pool.wikitolearn.org(.*?).png");
+        QRegularExpressionMatchIterator png = png_regex.globalMatch(content);
+
         while (links.hasNext()) {
             QRegularExpressionMatch match = links.next();
             QString down_link = match.captured(1).remove(QString("&mode=mathml\"")); ;
@@ -249,10 +255,41 @@ bool save_images(QString filename , int pageid)
             newpath = d.replace("http://en.wikitolearn.org/index.php?title=Special:MathShowImage&hash=",""); // clean img src in local html file and prepare the local path those are to be saved in html file
 
         }
+        while (png.hasNext()){
+                    QRegularExpressionMatch png_match = png.next();
+                    QString png_links = png_match.captured(1);
+                    qDebug() << "11" << png_links;
+
+                    png_links = "http://pool.wikitolearn.org"+png_links+".png";
+                    qDebug() << "11" << png_links;
+                    png_down_links << png_links;
+                    png_links = png_links.replace("http://pool.wikitolearn.org","");
+                    qDebug() << "11" << png_links;
+                    png_links = png_links.replace(".png","");
+                    qDebug() << "11" << png_links;
+                    newpath   = newpath.replace(png_links,"");
+
+
+
+                    QByteArray hash = png_links.toUtf8();
+                    QString hash_me = QString(QCryptographicHash::hash((hash),QCryptographicHash::Md5).toHex());
+                    png_links = hash_me ;
+                    qDebug() << "hash_me" << hash_me;
+                    png_hash << hash_me;
+
+
+                    png_links = png_links+".png";
+                    qDebug() << png_links;
+                    newpath   = newpath.replace("http://pool.wikitolearn.org.png",png_links);
+
+
+                }
 
 
 
         qDebug() << down_links; //got the list of downloads
+        qDebug() << png_down_links;
+        qDebug() << png_hash;
         file.close();
 
     }
@@ -294,6 +331,9 @@ bool save_images(QString filename , int pageid)
 
     dbmanager *d = new dbmanager(0) ;
     d->doDownload(down_links);
+    dbmanager *p = new dbmanager(0) ;
+    p->png_download(png_down_links, png_hash);
+
 
     return true ;
 
@@ -371,10 +411,88 @@ void dbmanager::downloadFinished(){
 }
 
 
+
+
+
 void dbmanager::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
 {
     //    ui->progressBar->setMaximum(totalBytes);
     //    ui->progressBar->setValue(bytesRead);
+    qDebug()<<bytesRead<<totalBytes;
+}
+
+
+// start downloading png
+
+void dbmanager::png_download(const QVariant& v , const QVariant& n )
+{
+    if (v.type() == QVariant::StringList) {
+
+
+        QNetworkAccessManager *manager= new QNetworkAccessManager(this);
+
+        QUrl url = v.toStringList().at(png_curr);
+        qDebug() << "*******  " << url;
+
+        png_filename = n.toStringList().at(png_curr);
+        png_network_reply = manager->get(QNetworkRequest(QUrl(url)));
+
+        connect(png_network_reply, SIGNAL(downloadProgress (qint64, qint64)),this, SLOT(update_png_download(qint64, qint64)));
+        connect(png_network_reply,SIGNAL(finished()),this,SLOT(png_finished()));
+
+
+    }
+}
+
+
+
+void dbmanager::png_finished(){
+    qDebug()<<png_filename;
+    if(png_network_reply->error() == QNetworkReply::NoError){
+
+
+        png_file =  new QFile(imgpath+"/"+png_filename+".png");
+        qDebug()<<imgpath+"/"+png_filename;
+        if(!png_file->open(QIODevice::ReadWrite | QIODevice::Truncate)){
+            qDebug() << png_file->errorString();
+        }
+        png_file->write(png_network_reply->readAll());
+
+        QByteArray bytes = png_network_reply->readAll();
+        QString str = QString::fromUtf8(bytes.data(), bytes.size());
+        int statusCode = png_network_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        qDebug() << QVariant(statusCode).toString();
+    }
+    png_file->flush();
+    png_file->close();
+    int total = png_down_links.count();
+    if(png_curr<total-1){
+        png_curr++;
+        qDebug()<<"current = "<<png_curr<<"total = "<<total;
+        png_download(png_down_links,png_hash);}
+    else if(png_curr==total-1)
+    {
+        qDebug()<<"download complete";
+    }
+
+    bool success = false ;
+    QString fname = png_filename;
+    success = add_depend(fname,revision_number);
+    if(success == true)
+    {
+        qDebug() <<"added in dependency table";
+    }
+    else
+    {
+        qDebug() << " error in adding to dependency table";
+    }
+
+
+}
+
+void dbmanager::update_png_download(qint64 bytesRead, qint64 totalBytes)
+{
+
     qDebug()<<bytesRead<<totalBytes;
 }
 
@@ -657,7 +775,7 @@ QString dbmanager::add(QString p_url)
             }
 
     }
-
+        return true ;
 
     }
 
