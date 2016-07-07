@@ -5,6 +5,7 @@ import QtQuick.Controls.Material 2.0
 import QtQuick.Controls.Universal 2.0
 import Qt.labs.settings 1.0
 
+
 ApplicationWindow {
     id: window
     width: 360
@@ -74,14 +75,28 @@ ApplicationWindow {
     }
 
     Drawer {
-        id: drawer
-        width: Math.min(window.width, window.height) / 3 * 2
-        height: window.height
+    id: drawer
+    width: Math.min(window.width, window.height) / 3 * 2
+    height: window.height
+
+    ColumnLayout {
+        anchors.fill: parent
+        Rectangle {
+            width: drawer.width
+            height: 50
+
+            TextField{
+                placeholderText: " Search WikiToLearn"
+                width: drawer.width
+
+            }
+        }
 
         ListView {
             id: listView
             currentIndex: -1
-            anchors.fill: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
             delegate: ItemDelegate {
                 width: parent.width
@@ -108,6 +123,7 @@ ApplicationWindow {
         }
     }
 
+}
     StackView {
         id: stackView
         anchors.fill: parent
