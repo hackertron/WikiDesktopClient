@@ -4,6 +4,7 @@ import QtQuick.Controls 2.0
 import QtQuick.Controls.Material 2.0
 import QtQuick.Controls.Universal 2.0
 import Qt.labs.settings 1.0
+import QtWebView 1.0
 
 
 ApplicationWindow {
@@ -12,6 +13,8 @@ ApplicationWindow {
     height: 520
     visible: true
     title: "WikiToLearn"
+
+
 
 
     Settings {
@@ -80,17 +83,39 @@ ApplicationWindow {
     height: window.height
 
     ColumnLayout {
-        anchors.fill: parent
-        Rectangle {
-            width: drawer.width
-            height: 50
+           anchors.fill: parent
+           Rectangle {
+               width: drawer.width
+               height: 50
 
-            TextField{
-                placeholderText: " Search WikiToLearn"
-                width: drawer.width
+               TextField{
+                   id: search_text
+                   placeholderText: " Search WikiToLearn"
+                   width: drawer.width
 
-            }
-        }
+                   Image {
+                       id: search_button
+                       anchors.right: search_text.right
+                       anchors.verticalCenter: search_text.verticalCenter
+                       source: "qrc:/images/search.png"
+                       MouseArea{
+                           anchors.fill: search_button
+                           onClicked: {
+                              loader.source = "qrc:/pages/search.qml"
+                           }
+                           Loader{
+
+                               id: loader
+                                   anchors.fill: parent
+
+                           }
+
+
+                       }
+                   }
+
+               }
+           }
 
         ListView {
             id: listView
@@ -130,6 +155,9 @@ ApplicationWindow {
 
         initialItem: Pane {
             id: pane
+            anchors.fill: parent
+
+
 
             Image {
                 id: logo
@@ -151,6 +179,7 @@ ApplicationWindow {
                 verticalAlignment: Label.AlignVCenter
                 wrapMode: Label.Wrap
             }
+
 
 
         }
