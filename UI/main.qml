@@ -109,6 +109,7 @@ ApplicationWindow {
                            onClicked: {
                               loader.source = "qrc:/pages/search.qml"
                                stackView.push(loader.item)
+                               listView.currentIndex = -1
                            }
 
 
