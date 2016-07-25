@@ -1,9 +1,12 @@
 QT += quick quickcontrols2
 QT += qml  webview
+QT += sql
+QT +=  network
 
 CONFIG += c++11
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    dbmanager.cpp
 
 RESOURCES += qml.qrc
 
@@ -23,3 +26,6 @@ DISTFILES += \
     android/gradlew.bat
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+HEADERS += \
+    dbmanager.h
