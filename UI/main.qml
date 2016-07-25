@@ -6,21 +6,134 @@ import QtQuick.Controls.Material 2.0
 import QtQuick.Controls.Universal 2.0
 import Qt.labs.settings 1.0
 import QtWebView 1.1
+import QtQuick.Controls.Styles 1.4
 
 
 ApplicationWindow {
     id: window
-    width: 360
-    height: 520
+    width: 520
+    height: 320
     visible: true
     title: "WikiToLearn"
 
-    Loader{
+    property string searchterm: "";
+    property alias searchwebview: webview;
+    property string current_title : "";
 
-        id: loader
-            anchors.fill: parent
+
+
+    function parsing()
+    {
+
+        var http = new XMLHttpRequest();
+
+        var json , parse , html , search;
+
+
+        http.onreadystatechange = function(){
+
+
+
+            if(http.readyState == 4 && http.status == 200)
+            {
+                loading.visible=false
+                json = http.responseText;
+                parse = JSON.parse(json);
+                search = parse.query.search;
+                html = "<!doctype html>";
+                html = html + "<html> <head> </head> <body>";
+                html =  html + "<h5> Search results  </h5> <br />";
+                for(var i in search){
+
+                    var title = search[i].title;
+                    var snippet = search[i].snippet;
+
+                    title = "<a href = \"http://en.wikitolearn.org/api.php?action=parse&page="+title+ "&format=json\">"+title+"</a>";
+                    html = html + title + "<br />";
+                    html =  html + snippet + "<br /> <br />" ;
+
+                }
+
+
+                html = html + "<br />";
+                html =  html+"</body> </html>";
+               //console.log(html);
+
+            }
+
+            webview.loadHtml(html);
+        };
+        loading.visible=true
+        http.open('GET',"http://en.wikitolearn.org/api.php?action=query&list=search&srsearch="+searchterm+"&format=json");
+        http.send();
+    }
+
+    function extract_json()
+    {
+
+        var p_url = searchwebview.url
+        console.log("*************");
+        console.log(p_url);
+
+
+        var http = new XMLHttpRequest();
+        var json , parse , text  , title;
+        var styling = " <head>
+ <link rel=\"stylesheet\" href=\"http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=ext.gadget.ColiruCompiler%7Cext.math.desktop.styles%7Cext.math.styles%7Cext.visualEditor.desktopArticleTarget.noscript%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.sectionAnchor&amp;only=styles&amp;skin=neverland\"/>
+<link rel=\"stylesheet\" href=\"http://en.wikitolearn.org/skins/Neverland/css/bootstrap.css?v=1.0.3?303\" media=\"screen\"/><link rel=\"stylesheet\" href=\"/skins/Neverland/css/bootstrap-social.css?303\" media=\"screen\"/><link rel=\"stylesheet\" href=\"/skins/Neverland/css/font-awesome-4.4.0/css/font-awesome.css?303\" media=\"screen\"/>
+<meta name=\"ResourceLoaderDynamicStyles\" content=\"\"/>
+<link rel=\"stylesheet\" href=\\http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=styles&amp;skin=neverland\"/>
+<script async=\"\" src=\"http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=neverland\"></script>
+<meta name=\"generator\" content=\"MediaWiki 1.27.0\"/>
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>
+<link rel=\"alternate\" type=\"application/x-wiki\" title=\"Edit\" href=\"http://en.wikitolearn.org/index.php?title=Linear_Algebra/Sets&amp;action=edit\"/>
+<link rel=\"edit\" title=\"Edit\" href=\"http://en.wikitolearn.org/index.php?title=Linear_Algebra/Sets&amp;action=edit\"/>
+<link rel=\"shortcut icon\" href=\"/favicon.ico\"/>
+<link rel=\"search\" type=\"application/opensearchdescription+xml\" href=\"/opensearch_desc.php\" title=\"WikiToLearn - collaborative textbooks (en)\"/>
+<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"http://en.wikitolearn.org/api.php?action=rsd\"/>
+<link rel=\"copyright\" href=\"/Project:Copyright\"/>
+<link rel=\"alternate\" type=\"application/atom+xml\" title=\"WikiToLearn - collaborative textbooks Atom feed\" href=\"http://en.wikitolearn.org/index.php?title=Special:RecentChanges&amp;feed=atom\"/>
+</head>";
+
+        http.onreadystatechange = function(){
+            if(http.readyState == 4 && http.status == 200)
+            { json = http.responseText;
+
+                parse = JSON.parse(json);
+
+                text = parse.parse.text["*"];
+                title = parse.parse.title;
+                current_title = title;
+                console.log(text);
+                 // <-- STRIP ME (o.O)
+                while(text.match(/&#039;\/\/restbase\.wikitolearn\.org/)){
+                text = text.replace(/&#039;\/\/restbase\.wikitolearn\.org/, "http://restbase.wikitolearn.org");
+                text = text.replace(/&#039;\);/, ");");
+                }
+
+                while(text.match(/src=\"\/\/pool.wikitolearn.org/))
+                {
+                    text = text.replace(/src=\"\/\/pool.wikitolearn.org/ , "src=\"http://pool.wikitolearn.org");
+                }
+
+
+                text = styling + text;
+                       console.log(text); // after strip :p .
+
+                       webview.loadHtml(text);
+                   }
+               };
+               http.open('GET',p_url);
+               http.send();
+
+
 
     }
+
+
+
+
+
 
 
     Settings {
@@ -84,237 +197,318 @@ ApplicationWindow {
     }
 
     Drawer {
-    id: drawer
-    width: Math.min(window.width, window.height) / 3 * 2
-    height: window.height
-
-    ColumnLayout {
-           anchors.fill: parent
-           Rectangle {
-               width: drawer.width
-               height: 50
-
-               TextField{
-                   id: search_text
-                   placeholderText: " Search WikiToLearn"
-                   width: drawer.width
-
-                   Image {
-                       id: search_button
-                       anchors.right: search_text.right
-                       anchors.verticalCenter: search_text.verticalCenter
-                       source: "qrc:/images/search.png"
-                       MouseArea{
-                           anchors.fill: search_button
-                           onClicked: {
-                              loader.source = "qrc:/pages/search.qml"
-                               stackView.push(loader.item)
-                               listView.currentIndex = -1
-                           }
+        id: drawer
+        width: Math.min(window.width, window.height) / 3 * 2
+        height: window.height
 
 
+        ColumnLayout {
+            anchors.fill: parent
+            Rectangle {
+                id: search_field
+                width: drawer.width
+                height: 50
 
-                       }
-                   }
+                TextField{
+                    id: search_text
+                    placeholderText: " Search WikiToLearn"
+                    width: drawer.width
+                    onAccepted: {
+                        listView.currentIndex = -1
+                        searchterm=text
 
-               }
-           }
+                        if(stackView.currentItem!==searchview)
+                       { stackView.push(searchview)
+                            webview.visible=true
 
-        ListView {
-            id: listView
-            currentIndex: -1
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            delegate: ItemDelegate {
-                width: parent.width
-                text: model.title
-                highlighted: ListView.isCurrentItem
-                onClicked: {
-                    if (listView.currentIndex != index) {
-                        listView.currentIndex = index
-                        titleLabel.text = model.title
-                        stackView.replace(model.source)
-
+                        }
+                        else{webview.visible=true}
+                        drawer.close();
+                        parsing();
                     }
-                    drawer.close()
+
+
+
+                    Image {
+                        id: search_button
+                        anchors.right: search_text.right
+                        anchors.verticalCenter: search_text.verticalCenter
+                        source: "qrc:/images/search.png"
+                        MouseArea{
+                            anchors.fill: search_button
+                            onClicked: {
+                                searchterm=search_text.text
+
+                                if(stackView.currentItem!==searchview)
+                               { stackView.push(searchview)
+                                 webview.visible=true
+                                }
+                                else{webview.visible=true}
+
+                                drawer.close();
+                                listView.currentIndex = -1
+                                parsing();
+
+                            }
+
+
+
+                        }
+                    }
+
+                }
+            }
+            Item{
+                visible: false
+                Text{
+                    visible: false
+                    id: responsetext
+                    text:""
                 }
             }
 
-            model: ListModel {
+            Button{
+                width: drawer.width
+                height: 40
 
-                ListElement { title: "Manage Pages"; source: "qrc:/pages/manage_pages.qml" }
+                text:"save offline"
+                onClicked: {
+                    responsetext.text = dbman.add(current_title);
+                    drawer.close();
 
-
+                }
             }
 
-            ScrollIndicator.vertical: ScrollIndicator { }
+
+
+
+
+
+            ListView {
+                id: listView
+                currentIndex: -1
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                delegate: ItemDelegate {
+                    width: parent.width
+                    text: model.title
+                    highlighted: ListView.isCurrentItem
+                    onClicked: {
+                        if (listView.currentIndex != index) {
+                            listView.currentIndex = index
+                            titleLabel.text = model.title
+                            stackView.replace(model.source)
+
+                        }
+                        drawer.close()
+                    }
+                }
+                model: ListModel {
+
+                    ListElement { title: "Home"; source:""}
+                    ListElement { title: "Manage Pages"; source: "qrc:/pages/manage_pages.qml" }
+
+                }
+
+                ScrollIndicator.vertical: ScrollIndicator { }
+                onCurrentIndexChanged: {
+                    if(currentIndex===0)stackView.push(pane)
+                }
+            }
+        }
+
+    }
+    StackView {
+        id: stackView
+        anchors.fill: parent
+
+
+        initialItem: Pane {
+            id: pane
+           // anchors.fill: parent
+
+
+            Image {
+                id: logo
+                width: pane.availableWidth / 2
+                height: pane.availableHeight / 2
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -50
+                fillMode: Image.PreserveAspectFit
+                source: "qrc:/images/wtl-logo.png"
+            }
+
+            Label {
+                text: "WikiToLearn wants to provide free, collaborative and accessible text books to the whole world \“knowledge only grows if shared\""
+                anchors.margins: 20
+                anchors.top: logo.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                horizontalAlignment: Label.AlignHCenter
+                verticalAlignment: Label.AlignVCenter
+                wrapMode: Label.Wrap
+            }
+
+
+
+
         }
     }
 
-}
-    StackView {
-           id: stackView
-           anchors.fill: parent
+Flickable{
+    Item{
+        id:searchview
+        AnimatedImage {
+            id: loading
+            z:1000
+            anchors.centerIn: webview
+            source: "qrc:/images/loading.gif"
+            visible: false
+        }
+        WebView{
+            id: webview
+            visible: false
+            anchors.fill: parent
+            onUrlChanged: {
+              //  console.log(searchwebview.url);
 
+                extract_json();
 
-           initialItem: Pane {
-               id: pane
+            }
+            onLoadingChanged: {
+                if(webview.loadProgress==="100" && url.toString().match("about:blank")){
+                    loadHtml("<html><head><title></title></head><body><center>Page not Found</center></body></html>");
+                }
+            }
+        }
 
+    }
+ }
 
+    Popup {
+        id: settingsPopup
+        x: (window.width - width) / 2
+        y: window.height / 6
+        width: Math.min(window.width, window.height) / 3 * 2
+        height: settingsColumn.implicitHeight + topPadding + bottomPadding
+        modal: true
+        focus: true
 
-               Image {
-                   id: logo
-                   width: pane.availableWidth / 2
-                   height: pane.availableHeight / 2
-                   anchors.centerIn: parent
-                   anchors.verticalCenterOffset: -50
-                   fillMode: Image.PreserveAspectFit
-                   source: "qrc:/images/wtl-logo.png"
-               }
+        contentItem: ColumnLayout {
+            id: settingsColumn
+            spacing: 20
 
-               Label {
-                   text: "WikiToLearn wants to provide free, collaborative and accessible text books to the whole world \“knowledge only grows if shared\""
-                   anchors.margins: 20
-                   anchors.top: logo.bottom
-                   anchors.left: parent.left
-                   anchors.right: parent.right
-                   horizontalAlignment: Label.AlignHCenter
-                   verticalAlignment: Label.AlignVCenter
-                   wrapMode: Label.Wrap
-               }
+            Label {
+                text: "Settings"
+                font.bold: true
+            }
 
-               WebView{
-                   id:webview
-                   anchors.fill: parent
+            RowLayout {
+                spacing: 10
 
-                   Component.onCompleted: url = "http://en.wikitolearn.org/"
-               }
+                Label {
+                    text: "Style:"
+                }
 
+                ComboBox {
+                    id: styleBox
+                    property int styleIndex: -1
+                    model: ["Default", "Material", "Universal"]
+                    Component.onCompleted: {
+                        styleIndex = find(settings.style, Qt.MatchFixedString)
+                        if (styleIndex !== -1)
+                            currentIndex = styleIndex
+                    }
+                    Layout.fillWidth: true
+                }
+            }
 
+            Label {
+                text: "Restart required"
+                color: "#e41e25"
+                opacity: styleBox.currentIndex !== styleBox.styleIndex ? 1.0 : 0.0
+                horizontalAlignment: Label.AlignHCenter
+                verticalAlignment: Label.AlignVCenter
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
 
-           }
-       }
+            RowLayout {
+                spacing: 10
 
-       Popup {
-           id: settingsPopup
-           x: (window.width - width) / 2
-           y: window.height / 6
-           width: Math.min(window.width, window.height) / 3 * 2
-           height: settingsColumn.implicitHeight + topPadding + bottomPadding
-           modal: true
-           focus: true
+                Button {
+                    id: okButton
+                    text: "Ok"
+                    onClicked: {
+                        settings.style = styleBox.displayText
+                        settingsPopup.close()
+                    }
 
-           contentItem: ColumnLayout {
-               id: settingsColumn
-               spacing: 20
+                    Material.foreground: Material.primary
+                    Material.background: "transparent"
+                    Material.elevation: 0
 
-               Label {
-                   text: "Settings"
-                   font.bold: true
-               }
+                    Layout.preferredWidth: 0
+                    Layout.fillWidth: true
+                }
 
-               RowLayout {
-                   spacing: 10
+                Button {
+                    id: cancelButton
+                    text: "Cancel"
+                    onClicked: {
+                        styleBox.currentIndex = styleBox.styleIndex
+                        settingsPopup.close()
+                    }
 
-                   Label {
-                       text: "Style:"
-                   }
+                    Material.background: "transparent"
+                    Material.elevation: 0
 
-                   ComboBox {
-                       id: styleBox
-                       property int styleIndex: -1
-                       model: ["Default", "Material", "Universal"]
-                       Component.onCompleted: {
-                           styleIndex = find(settings.style, Qt.MatchFixedString)
-                           if (styleIndex !== -1)
-                               currentIndex = styleIndex
-                       }
-                       Layout.fillWidth: true
-                   }
-               }
+                    Layout.preferredWidth: 0
+                    Layout.fillWidth: true
+                }
+            }
+        }
+    }
 
-               Label {
-                   text: "Restart required"
-                   color: "#e41e25"
-                   opacity: styleBox.currentIndex !== styleBox.styleIndex ? 1.0 : 0.0
-                   horizontalAlignment: Label.AlignHCenter
-                   verticalAlignment: Label.AlignVCenter
-                   Layout.fillWidth: true
-                   Layout.fillHeight: true
-               }
+    Popup {
+        id: aboutDialog
+        modal: true
+        focus: true
+        x: (window.width - width) / 2
+        y: window.height / 6
+        width: Math.min(window.width, window.height) / 3 * 2
+        contentHeight: aboutColumn.height
 
-               RowLayout {
-                   spacing: 10
+        Column {
+            id: aboutColumn
+            spacing: 20
 
-                   Button {
-                       id: okButton
-                       text: "Ok"
-                       onClicked: {
-                           settings.style = styleBox.displayText
-                           settingsPopup.close()
-                       }
+            Label {
+                text: "About"
+                font.bold: true
+            }
 
-                       Material.foreground: Material.primary
-                       Material.background: "transparent"
-                       Material.elevation: 0
-
-                       Layout.preferredWidth: 0
-                       Layout.fillWidth: true
-                   }
-
-                   Button {
-                       id: cancelButton
-                       text: "Cancel"
-                       onClicked: {
-                           styleBox.currentIndex = styleBox.styleIndex
-                           settingsPopup.close()
-                       }
-
-                       Material.background: "transparent"
-                       Material.elevation: 0
-
-                       Layout.preferredWidth: 0
-                       Layout.fillWidth: true
-                   }
-               }
-           }
-       }
-
-       Popup {
-           id: aboutDialog
-           modal: true
-           focus: true
-           x: (window.width - width) / 2
-           y: window.height / 6
-           width: Math.min(window.width, window.height) / 3 * 2
-           contentHeight: aboutColumn.height
-
-           Column {
-               id: aboutColumn
-               spacing: 20
-
-               Label {
-                   text: "About"
-                   font.bold: true
-               }
-
-               Label {
-                   width: aboutDialog.availableWidth
-                   text: "WikiToLearn wants to provide free, collaborative and accessible text books to the whole world.
+            Label {
+                width: aboutDialog.availableWidth
+                text: "WikiToLearn wants to provide free, collaborative and accessible text books to the whole world.
    Our philosophy is synthetized in the sentence: “knowledge only grows if shared”"
-                   wrapMode: Label.Wrap
-                   font.pixelSize: 12
-               }
+                wrapMode: Label.Wrap
+                font.pixelSize: 12
+            }
 
-               Label {
-                   width: aboutDialog.availableWidth
-                   text: "We provide a platform where learners and teachers can together complete,"
-                       + "refine and re-assemble notes, lecture notes in order to create text books, "
-                       + "tailored precisely to their needs, so that you can “stand on the shoulders of giants”"
-                   wrapMode: Label.Wrap
-                   font.pixelSize: 12
-               }
-           }
-       }
-   }
+            Label {
+                width: aboutDialog.availableWidth
+                text: "We provide a platform where learners and teachers can together complete,"
+                      + "refine and re-assemble notes, lecture notes in order to create text books, "
+                      + "tailored precisely to their needs, so that you can “stand on the shoulders of giants”"
+                wrapMode: Label.Wrap
+                font.pixelSize: 12
+            }
+        }
+    }
+
+
+
+
+}
