@@ -20,6 +20,6 @@
         <file>images/search.png</file>
         <file>images/wtl-logo.png</file>
         <file>pages/manage_pages.qml</file>
-        <file>pages/search.qml</file>
+        <file>images/loading.gif</file>
     </qresource>
 </RCC>
