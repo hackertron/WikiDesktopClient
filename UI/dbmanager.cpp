@@ -268,40 +268,43 @@ bool save_images(QString filename , int pageid)
 
         }
         while (png.hasNext()){
-            QRegularExpressionMatch png_match = png.next();
-            QString png_links = png_match.captured(1);
-            qDebug() << "11" << png_links;
+                           QRegularExpressionMatch png_match = png.next();
+                           QString png_links = png_match.captured(1);
+                           qDebug() << "11" << png_links;
 
-            png_links = "http://pool.wikitolearn.org"+png_links+".png";
-            qDebug() << "11" << png_links;
-            png_down_links << png_links;
-            png_links = png_links.replace("http://pool.wikitolearn.org","");
-            qDebug() << "11" << png_links;
-            png_links = png_links.replace(".png","");
-            qDebug() << "11" << png_links;
-            newpath   = newpath.replace(png_links,"");
-
-
-
-            QByteArray hash = png_links.toUtf8();
-            QString hash_me = QString(QCryptographicHash::hash((hash),QCryptographicHash::Md5).toHex());
-            png_links = hash_me ;
-            qDebug() << "hash_me" << hash_me;
+                           png_links = "http://pool.wikitolearn.org"+png_links+".png";
+                           qDebug() << "11" << png_links;
+                           png_down_links << png_links;
+                           png_links = png_links.replace("http://pool.wikitolearn.org","");
+                           qDebug() << "11" << png_links;
+                           png_links = png_links.replace(".png","");
+                           qDebug() << "11" << png_links;
+                           newpath   = newpath.replace(png_links,"");
 
 
 
-            png_links = png_links+".png";
-            qDebug() << png_links;
-            newpath   = newpath.replace("http://pool.wikitolearn.org.png",png_links);
+                           QByteArray hash = png_links.toUtf8();
+                           QString hash_me = QString(QCryptographicHash::hash((hash),QCryptographicHash::Md5).toHex());
+                           png_links = hash_me ;
+                           qDebug() << "hash_me" << hash_me;
+                           png_hash << hash_me;
 
 
-        }
+                           png_links = png_links+".png";
+                           qDebug() << png_links;
+                           newpath   = newpath.replace("http://pool.wikitolearn.org.png",png_links);
+
+
+                       }
+
 
 
 
         qDebug() << "size" << down_links.size();
+
         qDebug() << down_links; //got the list of downloads
         qDebug() << png_down_links;
+        qDebug() << png_hash;
         file.close();
 
     }
@@ -506,6 +509,7 @@ void dbmanager::update_png_download(qint64 bytesRead, qint64 totalBytes)
 
     qDebug()<<bytesRead<<totalBytes;
 }
+
 
 void save_file(QString text , int pageid , int revid)
 {
@@ -843,4 +847,3 @@ void dbmanager::update()
     }
 
 }
-
