@@ -34,8 +34,8 @@ private:
 
 
 public :
-    void doDownload(const QVariant &v);
-    void png_download(const QVariant &v , const QVariant &n);
+   void doDownload(const QVariant &v);
+   void png_download(const QStringList &v , const QStringList &n);
     QString imageDownloadPath;
 
 
