@@ -19,6 +19,7 @@
 #include <QRegularExpression>
 #include <QStringList>
 #include <QFileInfo>
+#include <QCryptographicHash>
 #include <QVector>
 
 
@@ -26,10 +27,12 @@
 int current= 0 , png_curr = 0;
 QStringList down_links;
 QStringList png_down_links;
-QStringList png_hash ;
+QStringList png_hash;
 QString imgpath;
 int revision_number = 0;
 QString data_path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+
+
 
 dbmanager::dbmanager(QObject *parent) : QObject(parent)
 {
@@ -100,7 +103,7 @@ bool del_from_db(QString id,int revid)
 QString clean_text(QString text)
 {
     text = text.replace("\n","");
-   /*
+    /*
     *
     *  text = text.replace("&#39;/index.php", "http://en.wikitolearn.org/index.php");
     text = text.replace("&amp;","&");
@@ -120,16 +123,15 @@ QString clean_text(QString text)
 bool check_links(QString text)
 {
 
-    QRegularExpression link_regex("pool.wikitolearn.org");
+    QRegularExpression link_regex("http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg");
     QRegularExpressionMatch contain = link_regex.match(text);
     qDebug() << contain;
 
     QRegularExpression svg_regex("http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg");
     QRegularExpressionMatch svg = svg_regex.match(text);
+    qDebug() << svg;
 
-
-
-    if(contain.capturedLength() > 0 )
+    if(contain.capturedLength() > 0)
     {
         return  true;
     }
@@ -256,47 +258,49 @@ bool save_images(QString filename , int pageid)
         QRegularExpression png_regex("src=\"http://pool.wikitolearn.org(.*?).png");
         QRegularExpressionMatchIterator png = png_regex.globalMatch(content);
 
+
         while (links.hasNext()) {
             QRegularExpressionMatch match = links.next();
-            QString down_link = match.captured(1);
-
+            QString down_link = match.captured(1).remove(QString("&mode=mathml\""));
+            //            qDebug()<<down_link.remove(QString("&mode=mathml\""));
+            down_link = down_link.remove("(");
+            down_link = down_link.remove(")");
             down_links << down_link;  //prepare list of downloads
             //start downloading images
             QString d = content.replace("http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg/",""); //clean img src in local html file
             qDebug() << imgpath ;
             newpath = d.replace("); background-repeat:",".svg); background-repeat:");
+        }
+
+        while (png.hasNext()){
+            QRegularExpressionMatch png_match = png.next();
+            QString png_links = png_match.captured(1);
+            qDebug() << "11" << png_links;
+
+            png_links = "http://pool.wikitolearn.org"+png_links+".png";
+            qDebug() << "11" << png_links;
+            png_down_links << png_links;
+            png_links = png_links.replace("http://pool.wikitolearn.org","");
+            qDebug() << "11" << png_links;
+            png_links = png_links.replace(".png","");
+            qDebug() << "11" << png_links;
+            newpath   = newpath.replace(png_links,"");
+
+
+
+            QByteArray hash = png_links.toUtf8();
+            QString hash_me = QString(QCryptographicHash::hash((hash),QCryptographicHash::Md5).toHex());
+            png_links = hash_me ;
+            qDebug() << "hash_me" << hash_me;
+            png_hash << hash_me;
+
+
+            png_links = png_links+".png";
+            qDebug() << png_links;
+            newpath   = newpath.replace("http://pool.wikitolearn.org.png",png_links);
+
 
         }
-        while (png.hasNext()){
-                           QRegularExpressionMatch png_match = png.next();
-                           QString png_links = png_match.captured(1);
-                           qDebug() << "11" << png_links;
-
-                           png_links = "http://pool.wikitolearn.org"+png_links+".png";
-                           qDebug() << "11" << png_links;
-                           png_down_links << png_links;
-                           png_links = png_links.replace("http://pool.wikitolearn.org","");
-                           qDebug() << "11" << png_links;
-                           png_links = png_links.replace(".png","");
-                           qDebug() << "11" << png_links;
-                           newpath   = newpath.replace(png_links,"");
-
-
-
-                           QByteArray hash = png_links.toUtf8();
-                           QString hash_me = QString(QCryptographicHash::hash((hash),QCryptographicHash::Md5).toHex());
-                           png_links = hash_me ;
-                           qDebug() << "hash_me" << hash_me;
-                           png_hash << hash_me;
-
-
-                           png_links = png_links+".png";
-                           qDebug() << png_links;
-                           newpath   = newpath.replace("http://pool.wikitolearn.org.png",png_links);
-
-
-                       }
-
 
 
 
@@ -320,9 +324,15 @@ bool save_images(QString filename , int pageid)
         qDebug() <<"write to file here";
         QTextStream out(&file);
 
-      //  newpath = "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">" + newpath;
-       // newpath = newpath.replace("svg> background-repeat:", "svg> <!--background-repeat:");
-       // newpath = newpath.replace("ex;\" />", "-->");
+        //newpath = "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">" + newpath;
+        //newpath = newpath.replace("svg> background-repeat:", "svg> <!--background-repeat:");
+        //newpath = newpath.replace("ex;\" />", "-->");
+
+
+
+
+
+
 
 
         out << newpath;
@@ -336,14 +346,13 @@ bool save_images(QString filename , int pageid)
         dir.cd("WTL_appdata");
         QString temp_name = dir.absoluteFilePath(filename);
         QString new_name = temp_name.replace(".html","");
-
+        QString css_path = new_name;
         new_name = new_name + "/" + fname +".html";
         file.rename(filename,new_name);
-
+        css_path = css_path + "/main.css";
+        file.copy(dir.absoluteFilePath("main.css"),css_path);
 
     }
-
-
 
     dbmanager *d = new dbmanager(0) ;
     d->doDownload(down_links);
@@ -369,10 +378,8 @@ void dbmanager::doDownload(const QVariant& v)
         QNetworkAccessManager *manager= new QNetworkAccessManager(this);
 
         QUrl url = v.toStringList().at(current);
-        qDebug() << "why break" << url;
 
         filename = url.toString().remove("http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg/");
-        qDebug() << filename;
         m_network_reply = manager->get(QNetworkRequest(QUrl(url)));
 
         connect(m_network_reply, SIGNAL(downloadProgress (qint64, qint64)),this, SLOT(updateDownloadProgress(qint64, qint64)));
@@ -436,29 +443,21 @@ void dbmanager::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
     qDebug()<<bytesRead<<totalBytes;
 }
 
-// start downloading png
 
-void dbmanager::png_download(const QVariant& v , const QVariant& n )
+void dbmanager::png_download(const QStringList &v, const QStringList &n)
 {
-    if (v.type() == QVariant::StringList) {
 
+    QNetworkAccessManager *mgr= new QNetworkAccessManager(this);
 
-        QNetworkAccessManager *manager= new QNetworkAccessManager(this);
+    QUrl url = v.at(current);
 
-        QUrl url = v.toStringList().at(png_curr);
-        qDebug() << "*******  " << url;
+    png_filename = n.at(png_curr);
+    png_network_reply = mgr->get(QNetworkRequest(QUrl(url)));
 
-        png_filename = n.toStringList().at(png_curr);
-        png_network_reply = manager->get(QNetworkRequest(QUrl(url)));
+    connect(png_network_reply, SIGNAL(downloadProgress (qint64, qint64)),this, SLOT(update_png_download(qint64, qint64)));
+    connect(png_network_reply,SIGNAL(finished()),this,SLOT(png_finished()));
 
-        connect(png_network_reply, SIGNAL(downloadProgress (qint64, qint64)),this, SLOT(update_png_download(qint64, qint64)));
-        connect(png_network_reply,SIGNAL(finished()),this,SLOT(png_finished()));
-
-
-    }
 }
-
-
 
 void dbmanager::png_finished(){
     qDebug()<<png_filename;
@@ -513,7 +512,7 @@ void dbmanager::update_png_download(qint64 bytesRead, qint64 totalBytes)
 
 void save_file(QString text , int pageid , int revid)
 {
-    if(!check_links(text)) // if no links in the page proceed
+    if(!check_links(text))
     {
         QDir dir(data_path);
         dir.cd("WTL_appdata");
@@ -542,10 +541,11 @@ void save_file(QString text , int pageid , int revid)
             // move html file to their respective folder
             QString temp_name = dir.absoluteFilePath(filename);
             QString new_name = temp_name.replace(".html","");
-
+            QString css_path = new_name;
             new_name = new_name + "/" + fname +".html";
             file.rename(filename,new_name);
-
+            css_path = css_path + "/main.css";
+            file.copy(dir.absoluteFilePath("main.css"),css_path);
 
             bool success = add_in_db(pageid,revid);
             if(success == true)
@@ -635,7 +635,6 @@ void del_file(QString pageid)
 QString dbmanager::add(QString p_url)
 {
 
-    qDebug() << p_url;
     QString text ;
     int pageid , revid;
 
@@ -790,7 +789,7 @@ bool check_revision(QString id , int revision_number)
         }
 
     }
-    return true ;
+
 
 }
 
@@ -847,3 +846,4 @@ void dbmanager::update()
     }
 
 }
+
