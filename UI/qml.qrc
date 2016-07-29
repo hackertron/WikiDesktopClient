@@ -1,14 +1,14 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>images/+material/drawer.png</file>
-        <file>images/+material/drawer@2x.png</file>
-        <file>images/+material/drawer@3x.png</file>
-        <file>images/+material/drawer@4x.png</file>
-        <file>images/+material/menu.png</file>
-        <file>images/+material/menu@2x.png</file>
-        <file>images/+material/menu@3x.png</file>
-        <file>images/+material/menu@4x.png</file>
+        <file>images/material/drawer.png</file>
+        <file>images/material/drawer@2x.png</file>
+        <file>images/material/drawer@3x.png</file>
+        <file>images/material/drawer@4x.png</file>
+        <file>images/material/menu.png</file>
+        <file>images/material/menu@2x.png</file>
+        <file>images/material/menu@3x.png</file>
+        <file>images/material/menu@4x.png</file>
         <file>images/drawer.png</file>
         <file>images/drawer@2x.png</file>
         <file>images/drawer@3x.png</file>
