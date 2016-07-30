@@ -29,6 +29,7 @@ QStringList down_links;
 QStringList png_down_links;
 QStringList png_hash;
 QString imgpath;
+bool math_svg , image_png = false;
 int revision_number = 0;
 QString data_path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
 
@@ -133,10 +134,12 @@ bool check_links(QString text)
 
     if(contain.capturedLength() > 0)
     {
+        math_svg = true;
         return  true;
     }
     else if(svg.capturedLength() > 0)
     {
+        image_png = true;
         return true;
     }
     else
@@ -354,12 +357,17 @@ bool save_images(QString filename , int pageid)
 
     }
 
-    dbmanager *d = new dbmanager(0) ;
-    d->doDownload(down_links);
+    if(math_svg!=false){
 
-    dbmanager *p = new dbmanager(0) ;
-    p->png_download(png_down_links, png_hash);
 
+        dbmanager *d = new dbmanager(0) ;
+        d->doDownload(down_links);
+    }
+
+    if(image_png!=false){
+        dbmanager *p = new dbmanager(0) ;
+        p->png_download(png_down_links, png_hash);
+    }
     return true ;
 
 }
