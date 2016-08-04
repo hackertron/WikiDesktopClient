@@ -6,7 +6,8 @@ QT +=  network
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    dbmanager.cpp
+    dbmanager.cpp \
+    model.cpp
 
 RESOURCES += qml.qrc
 
@@ -28,4 +29,5 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 HEADERS += \
-    dbmanager.h
+    dbmanager.h \
+    model.h
