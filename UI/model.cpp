@@ -1,102 +1,55 @@
 #include "model.h"
-#include "dbmanager.h"
 
-model::model()
+list::list(const QString &title, const QString &id)
+    : m_title(title), m_id(id)
 {
-    
 }
 
-QString model::page_name()
+QString list::title() const
 {
-    p_name = page_name.at(title);
-    
+    return m_title;
 }
 
-QString model::page_id()
+QString list::id() const
 {
-    p_id = page_id.at(id);
-    
+    return m_id;
 }
 
-void myModel::addpages(QString page)
+listmodel::listmodel(QObject *parent)
+    : QAbstractListModel(parent)
 {
-    
+}
+
+void listmodel::addpages(const list &list)
+{
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_entries << page;
+    m_list << list;
     endInsertRows();
 }
 
-QString model::read()
-{
-    // this will call addpages to add it in  m_entries 
-    QDir dir(data_path);
-    dir.cd("WTL_appdata");
-    
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//not dbConnection
-    db.setDatabaseName(dir.absoluteFilePath("WTL.db"));
-    if(!db.open())
-    {
-        qDebug() <<"error in opening DB";
-    }
-    else
-    {
-        qDebug() <<"connected to DB" ;
-
-    }
-    
-    QSqlQuery query;
-
-    query.prepare("SELECT page_ID  FROM Pages");
-    
-    query.exec();
-
-    if (query.next()) {
-        page_name = query.value(0);
-
-    }
-    db.close();
-    else
-    {
-        qDebug() << query.lastError();
-
-    }
-    
-    
-    qDebug() << page_name;
-    for (int i = 0; i < page_name.size(); ++i)
-    {
-                    
-            QString p = page_name.at(i);
-            addpages(p);
-            
-    }
-    
-    
-    
-}
-
-
-
-int myModel::rowCount(const QModelIndex & parent) const {
+int listmodel::rowCount(const QModelIndex & parent) const {
     Q_UNUSED(parent);
-    return m_entries.count();
+    return m_list.count();
 }
 
-QVariant myModel::data(const QModelIndex & index, int role) const {
-    if (index.row() < 0 || index.row() >= m_entries.count())
+QVariant listmodel::data(const QModelIndex & index, int role) const {
+    if (index.row() < 0 || index.row() >= m_list.count())
         return QVariant();
 
-    const model &model = m_entries[index.row()];
-    if (role == title)
-        return model.page_name();
-    else if (role == id)
-        return model.page_id();
+    const list &list = m_list[index.row()];
+    if (role == titlerole)
+        return list.title();
+    else if (role == idrole)
+        return list.id();
     return QVariant();
 }
 
-QHash<int, QByteArray> myModel::roleNames() const {
+//![0]
+QHash<int, QByteArray> listmodel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[title] = "title";
-    roles[id]    = "id";
+    roles[titlerole] = "title";
+    roles[idrole] = "id";
     return roles;
 }
+//![0]
+
