@@ -1,67 +1,46 @@
-#ifndef MODEL_H
-#define MODEL_H
-
-#include <QStringList>
 #include <QAbstractListModel>
-#include <QList>
-// from here 
-#include <QtSql>
-#include <QSqlDatabase>
-#include <QSqlDriver>
-#include <QFile>
-#include <QString>
-#include <QTextStream>
 #include <QStringList>
-#include <QFileInfo>
-// to here
 
-
-QString data_path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-
-class model : public QObject
+//![0]
+class list
 {
 public:
-    
-    model();
-    QStringList page_name , page_id;     
-    QString page_name();
-    QString page_id();
-    
-    
-    Q_INVOKABLE QString read();
-    
-    
-    
+    list(const QString &title, const QString &id);
+//![0]
+//type title size id animal list
+    QString title() const;
+    QString id() const;
+
 private:
-    QString p_name;
-    QString p_id;
-    
+    QString m_title;
+    QString m_id;
+//![1]
 };
 
-
-class myModel: public QAbstractListModel
+class listmodel : public QAbstractListModel
 {
     Q_OBJECT
-    
 public:
-    enum model_roles {
-        title = Qt::UserRole + 1,
-        id
+    enum listroles {
+        titlerole = Qt::UserRole + 1,
+        idrole
     };
-    
-    
-    void addpages(QString page);
-    
+
+    listmodel(QObject *parent = 0);
+
+
+    void addpages(const list &list);
+
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    
+
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    
+
 protected:
     QHash<int, QByteArray> roleNames() const;
-    
 private:
-    QList<model> m_entries;
-    
+    QList<list> m_list;
+
 };
 
-#endif // MODEL_H
+
+
