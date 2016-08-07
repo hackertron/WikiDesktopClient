@@ -21,6 +21,7 @@
 #include <QFileInfo>
 #include <QCryptographicHash>
 #include <QVector>
+#include "model.h"
 
 
 
@@ -47,7 +48,7 @@ dbmanager::dbmanager(QObject *parent) : QObject(parent)
 bool del_from_db(QString id,int revid)
 {
     bool done;
-    QDir databasePath;
+
     QDir dir(data_path);
     dir.cd("WTL_appdata");
 
@@ -153,7 +154,6 @@ bool check_links(QString text)
 
 bool add_depend(QString filename , int revision_number)
 {
-    QDir databasePath;
 
     QDir dir(data_path);
     dir.cd("WTL_appdata");
@@ -200,10 +200,10 @@ bool add_depend(QString filename , int revision_number)
 
 
 
-bool add_in_db(int pageid , int revid)
+bool add_in_db(int pageid , int revid , QString page_title)
 {
     revision_number = revid ;
-    QDir databasePath;
+
 
     QDir dir(data_path);
     dir.cd("WTL_appdata");
@@ -221,10 +221,11 @@ bool add_in_db(int pageid , int revid)
 
     QSqlQuery query;
 
-    query.prepare("INSERT INTO pages (page_ID,page_revision) "
-                  "VALUES (? , ?)");
+    query.prepare("INSERT INTO pages (page_ID,page_revision,page_title) "
+                  "VALUES (? , ? , ?)");
     query.bindValue(0,pageid);
     query.bindValue(1, revid);
+    query.bindValue(2, page_title);
 
     if(query.exec())
     {
@@ -518,7 +519,7 @@ void dbmanager::update_png_download(qint64 bytesRead, qint64 totalBytes)
 }
 
 
-void save_file(QString text , int pageid , int revid)
+void save_file(QString text , int pageid , int revid , QString page_title)
 {
     if(!check_links(text))
     {
@@ -555,7 +556,7 @@ void save_file(QString text , int pageid , int revid)
             css_path = css_path + "/main.css";
             file.copy(dir.absoluteFilePath("main.css"),css_path);
 
-            bool success = add_in_db(pageid,revid);
+            bool success = add_in_db(pageid,revid,page_title);
             if(success == true)
             {
                 qDebug() <<"entry added to DB successfully ";
@@ -593,7 +594,7 @@ void save_file(QString text , int pageid , int revid)
 
             // optional, as QFile destructor will already do it:
             file.close();
-            bool success = add_in_db(pageid,revid);
+            bool success = add_in_db(pageid,revid,page_title);
             if(success == true)
             {
                 qDebug() <<"entry added to DB successfully ";
@@ -643,7 +644,7 @@ void del_file(QString pageid)
 QString dbmanager::add(QString p_url)
 {
 
-    QString text ;
+    QString text , page_title ;
     int pageid , revid;
 
     QString requested_url = "http://en.wikitolearn.org/api.php?action=parse&page="+p_url+"&format=json";
@@ -672,6 +673,7 @@ QString dbmanager::add(QString p_url)
         text = jsonObj["parse"].toObject()["text"].toObject()["*"].toString();
         pageid = jsonObj["parse"].toObject()["pageid"].toInt();
         revid = jsonObj["parse"].toObject()["revid"].toInt();
+        page_title = jsonObj["parse"].toObject()["title"].toString();
 
         //clean the result from the API
         text = clean_text(text);
@@ -689,7 +691,7 @@ QString dbmanager::add(QString p_url)
 
     // ******************* here ****************
 
-    save_file(text , pageid , revid);
+    save_file(text , pageid , revid , page_title);
 
     // ***************************
 
@@ -704,7 +706,6 @@ QString dbmanager::del(QString pageid)
     qDebug() <<"DELETION CODE GOES HERE";
     del_file(pageid);
 
-    QDir databasePath;
 
     QDir dir(data_path);
     dir.cd("WTL_appdata");
@@ -766,6 +767,7 @@ bool check_revision(QString id , int revision_number)
 
         int  revid = jsonObj["parse"].toObject()["revid"].toInt();
         pageid = jsonObj["parse"].toObject()["pageid"].toInt();
+        QString page_title = jsonObj["parse"].toObject()["title"].toString();
         qDebug() << jsonObj["parse"].toObject()["title"].toString();
 
 
@@ -791,13 +793,14 @@ bool check_revision(QString id , int revision_number)
             }
             QString pid = QString::number(pageid);
             del_file(pid);
-            save_file( text ,  pageid ,  revision_number);
+            save_file( text ,  pageid ,  revision_number , page_title);
 
 
         }
 
     }
 
+return true;
 
 }
 
@@ -806,7 +809,7 @@ bool check_revision(QString id , int revision_number)
 void dbmanager::update()
 {
 
-    QDir databasePath;
+
 
     QDir dir(data_path);
     dir.cd("WTL_appdata");
@@ -824,7 +827,7 @@ void dbmanager::update()
 
 
     bool change = false ;
-    QSqlQuery count;
+
 
     QVector<QString> id ;
     QVector<int> revid;
