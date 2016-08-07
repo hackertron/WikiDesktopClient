@@ -30,6 +30,7 @@ public:
 
 
     void addpages(const list &list);
+    Q_INVOKABLE void deletepages(int row);
 
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
 
@@ -41,6 +42,3 @@ private:
     QList<list> m_list;
 
 };
-
-
-
