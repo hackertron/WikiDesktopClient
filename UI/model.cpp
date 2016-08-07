@@ -1,4 +1,5 @@
 #include "model.h"
+#include <QDebug>
 
 list::list(const QString &title, const QString &id)
     : m_title(title), m_id(id)
@@ -27,6 +28,8 @@ void listmodel::addpages(const list &list)
     endInsertRows();
 }
 
+
+
 int listmodel::rowCount(const QModelIndex & parent) const {
     Q_UNUSED(parent);
     return m_list.count();
@@ -51,5 +54,13 @@ QHash<int, QByteArray> listmodel::roleNames() const {
     roles[idrole] = "id";
     return roles;
 }
-//![0]
 
+void listmodel::deletepages(int row)
+{
+
+    qDebug() << row;
+    beginRemoveRows(QModelIndex(), row, row);
+    m_list.removeAt(row);
+
+       endRemoveRows();
+}
