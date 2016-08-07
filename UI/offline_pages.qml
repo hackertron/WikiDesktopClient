@@ -5,15 +5,38 @@ import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
-import Qt.labs.folderlistmodel 2.1
+import en.wtl.org 1.0
+import en.wtl.model 1.0
 
 Pane{
+
+    id: view
+
 
     ListView {
         width: 200; height: 250
 
         model: myModel
-        delegate: Text { text: "pages: " + title + ", " + id }
+        delegate: Component{
+            RowLayout{
+                Text {
+                    id: name
+                    text: title
+                    visible: true
+
+
+                }
+                Button{
+                    text: "delete"
+                    onClicked: {
+                        dbman.del(id)
+                        mod.deletepages(model.index)
+                        console.log(path);
+
+                    }
+                }
+            }
+        }
 
     }
 }
