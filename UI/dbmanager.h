@@ -13,9 +13,20 @@ class dbmanager : public QObject
 public:
     explicit dbmanager(QObject *parent = 0);
 
+    // to download the page locally and add it's entry to database
     Q_INVOKABLE QString add(QString p_url);
+
+    // to delete the page locally and remove it's entries from database
     Q_INVOKABLE QString del(QString pageid);
+
+    // to delete all the pages and remove the entries from database
+    Q_INVOKABLE void deleteAll();
+
+    // to update the page specified by user
     Q_INVOKABLE void update();
+
+    // forcefully update all pages
+    Q_INVOKABLE void update_page(QString pageid);
 
 
 
@@ -36,7 +47,7 @@ private:
 public :
    void doDownload(const QVariant &v);
    void png_download(const QStringList &v , const QStringList &n);
-    QString imageDownloadPath;
+    QString imageDownloadPath; // path to save the images
 
 
 private slots:
