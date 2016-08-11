@@ -1,3 +1,11 @@
+/*
+ * model.h and model.cpp is totally inspired from 
+ * QAbstractitem Model subclass 
+ * to get better and more detailed idea 
+ * refer : http://doc.qt.io/qt-5/qtquick-modelviewsdata-cppmodels.html
+ * 
+ */ 
+
 #include "model.h"
 #include <QDebug>
 
@@ -21,6 +29,8 @@ listmodel::listmodel(QObject *parent)
 {
 }
 
+
+// add pages to the list , to show user 
 void listmodel::addpages(const list &list)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -47,7 +57,7 @@ QVariant listmodel::data(const QModelIndex & index, int role) const {
     return QVariant();
 }
 
-//![0]
+
 QHash<int, QByteArray> listmodel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[titlerole] = "title";
@@ -55,12 +65,23 @@ QHash<int, QByteArray> listmodel::roleNames() const {
     return roles;
 }
 
+// delete specified page from the list of pages shown to user 
 void listmodel::deletepages(int row)
 {
 
     qDebug() << row;
     beginRemoveRows(QModelIndex(), row, row);
     m_list.removeAt(row);
+    endRemoveRows();
+}
 
-       endRemoveRows();
+// delete the whole list 
+void listmodel::deletelist()
+{
+    int total = m_list.count();
+    qDebug() << total;
+    for(int i = 0 ; i < total ; i++)
+    {
+        deletepages(i);
+    }
 }
