@@ -28,7 +28,9 @@ public:
     // forcefully update all pages
     Q_INVOKABLE void update_page(QString pageid);
 
+    Q_INVOKABLE void clear_list();
 
+    Q_INVOKABLE void quit();
 
 
 signals:
