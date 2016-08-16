@@ -6,7 +6,7 @@
 ## Project Structure
 
 your directory should look like this 
-Structure: ![project-structure](/doc/docs/code-docs/structure.png "Title")
+Structure: ![project-structure](/doc/docs/structure.png "Title")
 
 
 ## Setting up development environment 
