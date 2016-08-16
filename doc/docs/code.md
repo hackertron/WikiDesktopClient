@@ -6,7 +6,7 @@
 ## Project Structure
 
 your directory should look like this 
-Structure: ![project-structure](/structure.png "Title")
+Structure: ![project-structure](/doc/docs/structure.png "Title")
 
 
 ## Let's take a deeper look 
