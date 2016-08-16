@@ -1,0 +1,12 @@
+site_name: WikiToLearn Client 
+pages:
+- Home: index.md
+- Docs:
+    - 'How To Setup': 'code-docs/how-to-setup.md'
+    - 'dbmanager': 'code-docs/dbmanager.md'
+    - 'model': 'code-docs/model.md'
+    - 'main': 'code-docs/main.md'
+    
+- User-Docs: user-docs.md   
+- About: about.md
+theme: readthedocs
