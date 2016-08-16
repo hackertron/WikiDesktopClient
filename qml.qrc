@@ -22,5 +22,6 @@
         <file>pages/manage_pages.qml</file>
         <file>images/loading.gif</file>
         <file>pages/offline_pages.qml</file>
+        <file>pages/quit.qml</file>
     </qresource>
 </RCC>
