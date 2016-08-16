@@ -2,7 +2,7 @@
 
 ## Home Screen
 
-Home: ![Home](/home.png "home")
+Home: ![Home](/doc/docs/home.png "home")
 
 This is the home screen of the app . You can interact with the application using the side drawer
 
@@ -10,7 +10,7 @@ This is the home screen of the app . You can interact with the application using
 
 ## Drawer 
 
-Drawer: ![Drawer](/drawer.png "drawer")
+Drawer: ![Drawer](/doc/docs/drawer.png "drawer")
 
 - Enter the text that you want to search in text field .
 - Save offline : this button will save the page that user requests
@@ -21,7 +21,7 @@ Drawer: ![Drawer](/drawer.png "drawer")
 
 ## Global Actions
 
-Settings: ![Global](/settings.png "settings")
+Settings: ![Global](/doc/docs/settings.png "settings")
 
 -Settings : Settings allow user to select theme according to their preferences 
 -About : Tells about WikiToLearn 
@@ -31,13 +31,13 @@ Settings: ![Global](/settings.png "settings")
 
 Making search in the app is just like you make a search on any other application . 
 
-Search: ![Search](/search.gif "search")
+Search: ![Search](/doc/docs/search.gif "search")
 
 ## Saving page 
 
 Make a search and view your article . Click on **Save offline** button to save the page locally .
 
-Save: ![Save](/save.gif "save")
+Save: ![Save](/doc/docs/save.gif "save")
 
 ## Manage page 
 
@@ -47,7 +47,7 @@ Manage page allows you to delete or update page
 -Delete all : deletes all pages
 -Update all : updates all pages 
 
-Manage: ![Manage](/manage.png "Manage")
+Manage: ![Manage](/doc/docs/manage.png "Manage")
 
 
 ## Settings 
@@ -55,14 +55,14 @@ Manage: ![Manage](/manage.png "Manage")
 Settings allows you to choose 3 themes 
 -default
 
-default: ![default](/default.png "default")
+default: ![default](/doc/docs/default.png "default")
 
 -Material
 
-material : ![material](/home.png "material")
+material : ![material](/doc/docs/home.png "material")
 
 -Universal
 
-universal : ![universal](/universal.png "universal")
+universal : ![universal](/doc/docs/universal.png "universal")
 
 
