@@ -6,7 +6,7 @@
 ## Project Structure
 
 your directory should look like this 
-Structure: ![project-structure](/doc/docs/structure.png "Title")
+Structure: ![project-structure](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/structure.png "Title")
 
 
 ## Let's take a deeper look 
