@@ -6,7 +6,7 @@
 ## Project Structure
 
 your directory should look like this 
-Structure: ![project-structure](/doc/docs/structure.png "Title")
+Structure: ![project-structure](https://s3.postimg.org/k8dwi52wz/structure.png. "Title")
 
 
 ## Setting up development environment 
@@ -95,7 +95,7 @@ You can test that your Qt installation is successful by opening an existing exam
 
 3. To check that the application code can be compiled and linked for a device, click the Kit Selector and select a kit for the device.
 
-![Kit](/doc/docs/code-docs/kits.png "kits")
+[![kits.png](https://s3.postimg.org/j4dyj9u43/kits.png)](https://postimg.org/image/972xq7mi7/)
 
 4. Click  (Run) to build and run the application.
 
