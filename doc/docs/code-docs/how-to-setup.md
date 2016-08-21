@@ -6,7 +6,7 @@
 ## Project Structure
 
 your directory should look like this 
-Structure: ![project-structure](https://s3.postimg.org/k8dwi52wz/structure.png. "Title")
+Structure: ![project-structure](https://camo.githubusercontent.com/3023d1503bef4c19b33f4a25d81cff1c28b8f8aa/68747470733a2f2f73332e706f7374696d672e6f72672f6b386477693532777a2f7374727563747572652e706e672e. "Title")
 
 
 ## Setting up development environment 
