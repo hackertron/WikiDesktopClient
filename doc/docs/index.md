@@ -1,6 +1,6 @@
-# Welcome to MkDocs
+# Welcome to Wikitolearn desktop client documentation
 
-For full documentation visit [mkdocs.org](http://mkdocs.org).
+
 
 
 
