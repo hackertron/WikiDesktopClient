@@ -2,7 +2,7 @@
 
 ## Home Screen
 
-Home: ![Home](/doc/docs/home.png "home")
+Home: ![Home](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/home.png "home")
 
 This is the home screen of the app . You can interact with the application using the side drawer
 
@@ -10,7 +10,7 @@ This is the home screen of the app . You can interact with the application using
 
 ## Drawer 
 
-Drawer: ![Drawer](/doc/docs/drawer.png "drawer")
+Drawer: ![Drawer](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/drawer.png "drawer")
 
 - Enter the text that you want to search in text field .
 - Save offline : this button will save the page that user requests
@@ -21,7 +21,7 @@ Drawer: ![Drawer](/doc/docs/drawer.png "drawer")
 
 ## Global Actions
 
-Settings: ![Global](/doc/docs/settings.png "settings")
+Settings: ![Global](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/settings.png "settings")
 
 -Settings : Settings allow user to select theme according to their preferences 
 -About : Tells about WikiToLearn 
@@ -31,13 +31,13 @@ Settings: ![Global](/doc/docs/settings.png "settings")
 
 Making search in the app is just like you make a search on any other application . 
 
-Search: ![Search](/doc/docs/search.gif "search")
+Search: ![Search](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/search.gif "search")
 
 ## Saving page 
 
 Make a search and view your article . Click on **Save offline** button to save the page locally .
 
-Save: ![Save](/doc/docs/save.gif "save")
+Save: ![Save](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/save.gif "save")
 
 ## Manage page 
 
@@ -47,7 +47,7 @@ Manage page allows you to delete or update page
 -Delete all : deletes all pages
 -Update all : updates all pages 
 
-Manage: ![Manage](/doc/docs/manage.png "Manage")
+Manage: ![Manage](https://github.com/hackertron/W2L/raw/master/doc/docs/manage.png "Manage")
 
 
 ## Settings 
@@ -55,14 +55,14 @@ Manage: ![Manage](/doc/docs/manage.png "Manage")
 Settings allows you to choose 3 themes 
 -default
 
-default: ![default](/doc/docs/default.png "default")
+default: ![default](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/default.png "default")
 
 -Material
 
-material : ![material](/doc/docs/home.png "material")
+material : ![material](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/home.png "material")
 
 -Universal
 
-universal : ![universal](/doc/docs/universal.png "universal")
+universal : ![universal](https://raw.githubusercontent.com/hackertron/W2L/master/doc/docs/universal.png "universal")
 
 
