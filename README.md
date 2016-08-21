@@ -1,7 +1,7 @@
 # W2L
 W2L desktop client code  resides here
 
-[![Documentation Status](https://readthedocs.org/projects/w2l/badge/?version=latest)](http://w2l.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/wtld/badge/?version=latest)](http://wtld.readthedocs.io/en/latest/?badge=latest)
 
 
 ![home](https://s32.postimg.org/5u2eg7trp/home.png)
