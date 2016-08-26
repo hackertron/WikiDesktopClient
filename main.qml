@@ -319,7 +319,7 @@ ApplicationWindow {
                     ListElement { title: "Home"; source:""}
                     ListElement { title: "Manage Pages"; source: "qrc:/pages/manage_pages.qml" }
                     ListElement { title: "Saved pages";  source: "qrc:/pages/offline_pages.qml"}
-                    ListElement { title: "Quit";         source: "qrc:/pages/quit.qml"         }
+
 
                 }
 
