@@ -21,7 +21,6 @@
         <file>images/wtl-logo.png</file>
         <file>pages/manage_pages.qml</file>
         <file>images/loading.gif</file>
-        <file>pages/offline_pages.qml</file>
-        <file>pages/quit.qml</file>
+        <file>pages/offline_pages.qml</file>        
     </qresource>
 </RCC>
