@@ -1,24 +1,17 @@
 import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
+import QtQuick.Window 2.2
+import QtQuick.Dialogs 1.2
+import QtQuick.Layouts 1.1
+import QtQuick.Controls 2.0
+import en.wtl.org 1.0
+import en.wtl.model 1.0
 
 
 Pane {
     padding: 0
 
-    property var delegateComponentMap: {
-        "page": itemDelegateComponent
-
-    }
-
-    Component {
-        id: itemDelegateComponent
-
-        ItemDelegate {
-            text: labelText
-            width: parent.width
-        }
-    }
 
 
 
@@ -45,13 +38,7 @@ Pane {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: ListModel {
-                ListElement { type: "ItemDelegate"; labelText: "page1" }
-                ListElement { type: "ItemDelegate"; labelText: "page2" }
-                ListElement { type: "ItemDelegate"; labelText: "page3" }
-
-
-            }
+            model: myModel
             spacing: 5
 
             section.property: "type"
@@ -69,27 +56,38 @@ Pane {
                         anchors.fill: parent
                         spacing: 10
 
-                        Label{
-                            id:page_name
+                        Text {
+                            id: name
+                            text: title
                             padding: 10
-                            text: labelText
-                            Layout.fillWidth: true // !!! to fill most part of row width
+                            visible: true
+                            Layout.fillWidth: true
+
 
                         }
 
+                        Button{
+                            id: delete_button
+                            text: "delete"
 
-                            Button{
-
-                                text: qsTr("Delete")
-
-                                id: delete_button
+                            onClicked: {
+                                dbman.del(id)
+                                mod.deletepages(model.index);
+                                console.log(path);
 
                             }
-                            Button{
+                        }
+                        Button{
+                            id: update_button
 
-                                text: qsTr("Update")
-                                id: update_button
+                            text: "update"
+                            onClicked: {
+                                dbman.update_page(id);
+                                mod.update(id,model.index);
+                                console.log(path);
+
                             }
+                        }
 
 
 
@@ -111,11 +109,18 @@ Pane {
 
             Button{
                 text:"Update All"
+                onClicked: {
+                    dbman.update();
+                }
 
 
             }
             Button{
                 text:"Delete All"
+                onClicked: {
+                    mod.deletelist();
+                    dbman.deleteAll();
+                }
             }
         }
     }
