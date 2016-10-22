@@ -1,5 +1,5 @@
 # W2L
-W2L desktop client code  resides here
+WikiToLearn desktop client is a client to browse wikitolearn content on your devices . The client can browse wikitolearn, save the pages offline reading too . Go ahead and give it a try !!
 
 [![Documentation Status](https://readthedocs.org/projects/wtld/badge/?version=latest)](http://wtld.readthedocs.io/en/latest/?badge=latest)
 
