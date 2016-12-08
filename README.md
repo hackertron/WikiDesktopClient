@@ -3,7 +3,7 @@ WikiToLearn desktop client is a client to browse wikitolearn content on your dev
 
 [![Documentation Status](https://readthedocs.org/projects/wtld/badge/?version=latest)](http://wtld.readthedocs.io/en/latest/?badge=latest)
 
+Linux 
+![home](https://s27.postimg.org/kw5iryo5f/image.png)
+![drawer](https://s28.postimg.org/nyqtp7231/image.png)
 
-![home](https://s32.postimg.org/5u2eg7trp/home.png)
-![drawer](https://s32.postimg.org/mgwdqs779/draw.png)
-![manage](https://s31.postimg.org/6uyiawx57/manage.png)
