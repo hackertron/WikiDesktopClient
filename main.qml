@@ -68,7 +68,7 @@ ApplicationWindow {
             webview.loadHtml(html);
         };
         loading.visible=true
-        http.open('GET',"http://en.wikitolearn.org/api.php?action=query&list=search&srsearch="+searchterm+"&format=json");
+        http.open('GET',"http://en.wikitolearn.org/api.php?action=query&list=search&srwhat=text&srsearch="+searchterm+"&format=json");
         http.send();
     }
 
@@ -319,7 +319,7 @@ ApplicationWindow {
                     ListElement { title: "Home"; source:""}
                     ListElement { title: "Manage Pages"; source: "qrc:/pages/manage_pages.qml" }
                     ListElement { title: "Saved pages";  source: "qrc:/pages/offline_pages.qml"}
-
+                    ListElement { title: "Quit";         source: "qrc:/pages/quit.qml"         }
 
                 }
 
