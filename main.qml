@@ -68,7 +68,7 @@ ApplicationWindow {
             webview.loadHtml(html);
         };
         loading.visible=true
-        http.open('GET',"http://en.wikitolearn.org/api.php?action=query&list=search&srwhat=text&srsearch="+searchterm+"&format=json");
+        http.open('GET',"http://en.wikitolearn.org/api.php?action=query&list=search&srsearch="+searchterm+"&format=json");
         http.send();
     }
 
