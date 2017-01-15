@@ -9,11 +9,6 @@ Item {
    SystemPalette { id: palette }
    clip: true
 
-   Loader {
-       id: pageLoader
-       anchors.fill: parent
-   }
-
     MessageDialog {
         id: quitDialog
         text: "Do you wish to quit?"
@@ -24,6 +19,6 @@ Item {
         onAccepted: Qt.quit()
         Component.onCompleted: visible = true
         onYes : Qt.quit();
-        onNo: pageLoader.source = "qrc:/main.qml"
-        }
+        onNo: console.log("Not quitting")
+    }
 }
