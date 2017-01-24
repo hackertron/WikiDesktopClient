@@ -24,15 +24,9 @@ ApplicationWindow {
     // function parsing is used to request and  parse the JSON returned by the API
     function parsing()
     {
-
         var http = new XMLHttpRequest();
-
         var json , parse , html , search;
-
-
         http.onreadystatechange = function(){
-
-
             /*
               checks if the
               request finished and response is ready ( readystate 4)
@@ -57,14 +51,10 @@ ApplicationWindow {
                     html =  html + snippet + "<br /> <br />" ;
 
                 }
-
-
                 html = html + "<br />";
                 html =  html+"</body> </html>";
                 //console.log(html);
-
             }
-
             webview.loadHtml(html);
         };
         loading.visible=true
@@ -131,16 +121,9 @@ ApplicationWindow {
         };
         http.open('GET',p_url);
         http.send();
-
-
-
     }
 
-
-    /* Material Settings as per the google guidelines
-
-
-     */
+    /* Material Settings as per the google guidelines */
 
     Settings {
         id: settings
@@ -287,11 +270,6 @@ ApplicationWindow {
 
                 }
             }
-
-
-
-
-
 
             ListView {
                 id: listView
