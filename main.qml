@@ -110,11 +110,11 @@ ApplicationWindow {
                 text = parse.parse.text["*"];
                 title = parse.parse.title;
                 current_title = title;
-                console.log(text);
+                 console.log(text);
                 // <-- STRIP ME (o.O) Basically construct the url
-                while(text.match(/&#039;\/\/restbase\.wikitolearn\.org/)){
-                    text = text.replace(/&#039;\/\/restbase\.wikitolearn\.org/, "http://restbase.wikitolearn.org");
-                    text = text.replace(/&#039;\);/, ");");
+                while(text.match(/\"\/\/restbase\.wikitolearn\.org/)){
+                    text = text.replace(/\"\/\/restbase\.wikitolearn\.org/, "\"http://restbase.wikitolearn.org");
+
                 }
 
                 while(text.match(/src=\"\/\/pool.wikitolearn.org/))
