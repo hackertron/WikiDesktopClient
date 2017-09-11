@@ -105,8 +105,7 @@ bool del_from_db(QString id,int revid)
 QString clean_text(QString text)
 {
     text = text.replace("\n","");
-    text = text.replace("&#039;//restbase.wikitolearn.org", "http://restbase.wikitolearn.org");
-    text = text.replace("&#039;);", ");");
+    text = text.replace("\"//restbase.wikitolearn.org", "http://restbase.wikitolearn.org");
     text = text.replace("src=\"//pool.wikitolearn.org" , "src=\"http://pool.wikitolearn.org");
     return(text);
 }
@@ -332,6 +331,7 @@ bool save_images(QString filename , int pageid) // image saving function
 
         QString styling = "<head>"
                           "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">"
+                          "<link rel=\"stylesheet\" type=\"text/css\" href=\"wikitolearnskin.css\">"
                           "<link rel=\"stylesheet\" type=\"text/css\" href=\"bootstrap.css\">"
                           "</head>";
 
@@ -353,13 +353,16 @@ bool save_images(QString filename , int pageid) // image saving function
         QString css_path = new_name;
         new_name = new_name + "/" + fname +".html";
         file.rename(filename,new_name);
+
+        // copy required css files.
         css_path = css_path + "/main.css";
         file.copy(dir.absoluteFilePath("main.css"),css_path);
 
         css_path = css_path.replace("/main.css","/bootstrap.css");
         file.copy(dir.absoluteFilePath("bootstrap.css"),css_path);
 
-
+        css_path = css_path.replace("/bootstrap.css","/wikitolearnskin.css");
+        file.copy(dir.absoluteFilePath("wikitolearnskin.css"),css_path);
 
 
     }
@@ -562,6 +565,8 @@ void save_file(QString text , int pageid , int revid , QString page_title)
             QTextStream out(&file);
 
             text = "<link rel=\"stylesheet\" type=\"text/css\" href=\"main.css\">" +text;
+            text = "<link rel=\"stylesheet\" type=\"text/css\" href=\"wikitolearnskin.css\">" + text;
+            text = "<link rel=\"stylesheet\" type=\"text/css\" href=\"bootstrap.css\">" + text;
             out << text;
 
             // optional, as QFile destructor will already do it:
