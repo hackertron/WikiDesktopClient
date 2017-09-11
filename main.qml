@@ -87,17 +87,18 @@ ApplicationWindow {
         var http = new XMLHttpRequest();
         var json , parse , text  , title;
         var styling = " <head>
- <link rel=\"stylesheet\" href=\"http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=ext.gadget.ColiruCompiler%7Cext.math.desktop.styles%7Cext.math.styles%7Cext.visualEditor.desktopArticleTarget.noscript%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.sectionAnchor&amp;only=styles&amp;skin=neverland\"/>
-<link rel=\"stylesheet\" href=\"http://en.wikitolearn.org/skins/Neverland/css/bootstrap.css?v=1.0.3?303\" media=\"screen\"/><link rel=\"stylesheet\" href=\"/skins/Neverland/css/bootstrap-social.css?303\" media=\"screen\"/><link rel=\"stylesheet\" href=\"/skins/Neverland/css/font-awesome-4.4.0/css/font-awesome.css?303\" media=\"screen\"/>
+<link rel =\"stylesheet\" href=\"http://en.wikitolearn.org/load.php?debug=false&lang=en&modules=ext.math.styles%7Cext.visualEditor.desktopArticleTarget.noscript%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.sectionAnchor%7Cskin.wikitolearn&only=styles&skin=wikitolearnskin\"/>
+<link rel=\"stylesheet\" href=\"https://en.wikitolearn.org/load.php?debug=false&lang=en&modules=ext.echo.badgeicons%7Cext.echo.styles.badge%7Cext.visualEditor.desktopArticleTarget.noscript%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.sectionAnchor%7Cskin.wikitolearn&only=styles&skin=wikitolearnskin\"/>
+<script async=\"\" src=\"https://en.wikitolearn.org/load.php?debug=false&lang=en&modules=startup&only=scripts&skin=wikitolearnskin\"></script>
+<link rel=\"stylesheet\" href=\"https://en.wikitolearn.org/skins/WikiToLearnSkin/bower_components/font-awesome/css/font-awesome.min.css?314\"/>
 <meta name=\"ResourceLoaderDynamicStyles\" content=\"\"/>
-<link rel=\"stylesheet\" href=\\http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=styles&amp;skin=neverland\"/>
-<script async=\"\" src=\"http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=neverland\"></script>
+<link rel=\"stylesheet\" href=\http://en.wikitolearn.org/load.php?debug=false&lang=en&modules=site&only=styles&skin=neverland\"/>
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>
 <link rel=\"shortcut icon\" href=\"http://en.wikitolearn.org/favicon.ico\"/>
-<link rel=\"search\" type=\"application/opensearchdescription+xml\" href=\"/opensearch_desc.php\" title=\"WikiToLearn - collaborative textbooks (en)\"/>
+<link rel=\"search\" type=\"application/opensearchdescription+xml\" href=\"/https://en.wikitolearn.org/opensearch_desc.php\" title=\"WikiToLearn - collaborative textbooks (en)\"/>
 <link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"http://en.wikitolearn.org/api.php?action=rsd\"/>
-<link rel=\"copyright\" href=\"/Project:Copyright\"/>
-<link rel=\"alternate\" type=\"application/atom+xml\" title=\"WikiToLearn - collaborative textbooks Atom feed\" href=\"http://en.wikitolearn.org/index.php?title=Special:RecentChanges&amp;feed=atom\"/>
+<link rel=\"copyright\" href=\"https://en.wikitolearn.org/Project:Copyright\"/>
+<link rel=\"alternate\" type=\"application/atom+xml\" title=\"WikiToLearn - collaborative textbooks Atom feed\" href=\"http://en.wikitolearn.org/index.php?title=Special:RecentChanges&feed=atom\"/>
 </head>";
 
         http.onreadystatechange = function(){
@@ -138,7 +139,7 @@ ApplicationWindow {
 
     /* Material Settings as per the google guidelines
         settings are set to default .
-        can be changed from settings option in the Application
+        can be changed from settings option in the
      */
 
     Settings {
