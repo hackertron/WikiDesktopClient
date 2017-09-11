@@ -55,6 +55,48 @@ void css_download(QString url , QString filename, QString path)
     }
 }
 
+void js_download(QString url , QString filename, QString path)
+{
+    QString requested_url = url;
+
+    // create custom temporary event loop on stack
+    QEventLoop eventLoop;
+
+    // "quit()" the event-loop, when the network request "finished()"
+    QNetworkAccessManager mgr;
+    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+    // the HTTP request
+    QNetworkRequest req( requested_url );
+    QNetworkReply *reply = mgr.get(req);
+    eventLoop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+
+        QDir dir(path);
+        if (!dir.exists())
+            dir.mkpath(path);
+        if (!dir.exists("WTL_appdata"))
+            dir.mkdir("WTL_appdata");
+
+        dir.cd("WTL_appdata");
+
+        QString   js = (QString)reply->readAll();
+        filename = dir.absoluteFilePath(filename);
+
+        QFile file(filename);
+        if (file.open(QIODevice::ReadWrite)) {
+            QTextStream stream(&file);
+            stream << js << endl;
+        }
+
+    }
+}
+
+
+
+
+
 int main(int argc, char *argv[])
 {
     QGuiApplication::setApplicationName("WikiToLearn");
@@ -190,7 +232,7 @@ int main(int argc, char *argv[])
     }
 
     else{
-        QString url = "http://en.wikitolearn.org/load.php?debug=false&lang=en&modules=ext.gadget.ColiruCompiler%7Cext.math.desktop.styles%7Cext.math.styles%7Cext.visualEditor.desktopArticleTarget.noscript%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.sectionAnchor&only=styles&skin=neverland";
+        QString url = "https://en.wikitolearn.org/load.php?debug=false&lang=en&modules=ext.echo.badgeicons%7Cext.echo.styles.badge%7Cext.math.styles%7Cext.visualEditor.desktopArticleTarget.noscript%7Cmediawiki.legacy.commonPrint%2Cshared%7Cmediawiki.sectionAnchor%7Cskin.wikitolearn&only=styles&skin=wikitolearnskin";
         css_download(url,"main.css",path);
 
     }
@@ -200,7 +242,7 @@ int main(int argc, char *argv[])
         qDebug() << "already downloaded bootstrap.css";
     }
     else{
-        QString  url = "http://en.wikitolearn.org/skins/Neverland/css/bootstrap.css?v=1.0.3?303";
+        QString  url = "https://en.wikitolearn.org/skins/WikiToLearnSkin/bower_components/font-awesome/css/font-awesome.min.css?314";
         css_download(url,"bootstrap.css",path);
 
     }
@@ -216,10 +258,23 @@ int main(int argc, char *argv[])
 
 
 
-
-
-
     /* css download end  */
+
+    /* js download */
+    if(QFile::exists(dir.absoluteFilePath("wikitolearnskin.js"))) // checks if the js file already exist
+    {
+        qDebug() << " already downloaded wikitolearnskin.js";
+    }
+
+    else{
+        QString url = "https://en.wikitolearn.org/load.php?debug=false&lang=en&modules=startup&only=scripts&skin=wikitolearnskin";
+        js_download(url,"wikitolearnskin.js",path);
+
+    }
+
+
+
+    /* js download end */
 
     QSettings settings;
     QString style = QQuickStyle::name();
