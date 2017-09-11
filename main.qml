@@ -24,9 +24,15 @@ ApplicationWindow {
     // function parsing is used to request and  parse the JSON returned by the API
     function parsing()
     {
+
         var http = new XMLHttpRequest();
+
         var json , parse , html , search;
+
+
         http.onreadystatechange = function(){
+
+
             /*
               checks if the
               request finished and response is ready ( readystate 4)
@@ -51,10 +57,14 @@ ApplicationWindow {
                     html =  html + snippet + "<br /> <br />" ;
 
                 }
+
+
                 html = html + "<br />";
                 html =  html+"</body> </html>";
                 //console.log(html);
+
             }
+
             webview.loadHtml(html);
         };
         loading.visible=true
@@ -82,7 +92,6 @@ ApplicationWindow {
 <meta name=\"ResourceLoaderDynamicStyles\" content=\"\"/>
 <link rel=\"stylesheet\" href=\\http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=styles&amp;skin=neverland\"/>
 <script async=\"\" src=\"http://en.wikitolearn.org/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=neverland\"></script>
-<meta name=\"generator\" content=\"MediaWiki 1.27.0\"/>
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>
 <link rel=\"shortcut icon\" href=\"http://en.wikitolearn.org/favicon.ico\"/>
 <link rel=\"search\" type=\"application/opensearchdescription+xml\" href=\"/opensearch_desc.php\" title=\"WikiToLearn - collaborative textbooks (en)\"/>
@@ -121,13 +130,20 @@ ApplicationWindow {
         };
         http.open('GET',p_url);
         http.send();
+
+
+
     }
 
-    /* Material Settings as per the google guidelines */
+
+    /* Material Settings as per the google guidelines
+        settings are set to default .
+        can be changed from settings option in the Application
+     */
 
     Settings {
         id: settings
-        property string style: "Material"
+        property string style: "Default"
     }
 
     header: ToolBar {
@@ -270,6 +286,11 @@ ApplicationWindow {
 
                 }
             }
+
+
+
+
+
 
             ListView {
                 id: listView
