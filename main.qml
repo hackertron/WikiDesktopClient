@@ -110,7 +110,7 @@ ApplicationWindow {
                 text = parse.parse.text["*"];
                 title = parse.parse.title;
                 current_title = title;
-                 console.log(text);
+                console.log(text);
                 // <-- STRIP ME (o.O) Basically construct the url
                 while(text.match(/\"\/\/restbase\.wikitolearn\.org/)){
                     text = text.replace(/\"\/\/restbase\.wikitolearn\.org/, "\"http://restbase.wikitolearn.org");
@@ -121,6 +121,12 @@ ApplicationWindow {
                 {
                     text = text.replace(/src=\"\/\/pool.wikitolearn.org/ , "src=\"http://pool.wikitolearn.org");
                 }
+
+                while(text.match(/<a href=\"\//))
+                {
+                    text = text.replace(/<a href=\"\//, "<a href=\"http://en.wikitolearn.org\/")
+                }
+
 
 
                 text = styling + text;
@@ -139,7 +145,7 @@ ApplicationWindow {
 
     /* Material Settings as per the google guidelines
         settings are set to default .
-        can be changed from settings option in the
+        can be changed from settings in the option
      */
 
     Settings {
