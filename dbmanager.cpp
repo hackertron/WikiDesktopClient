@@ -448,6 +448,7 @@ void dbmanager::downloadFinished(){
         qDebug()<<"download complete";
         down_links.clear();
         math_svg = false;
+        clear_list();
     }
 
     bool success = false ;
@@ -519,6 +520,7 @@ void dbmanager::png_finished(){
         png_down_links.clear();
         png_hash.clear();
         image_png = false;
+        clear_list();
     }
 
     bool success = false ;
