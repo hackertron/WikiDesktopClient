@@ -16,5 +16,6 @@ WikiToLearn desktop client is a client to browse wikitolearn content on your dev
 
 ## Android Screenshot
 
-![home](https://s27.postimg.org/dkcw73toz/Screenshot_2016_12_08_22_40_35_en_wikitolearn_or.png =100x20)
-![drawer](https://s30.postimg.org/bgl5udlgh/image.png =100x20)
+![home](https://raw.githubusercontent.com/WikiToLearn/WTL_client/master/home.jpeg)
+
+![drawer](https://raw.githubusercontent.com/WikiToLearn/WTL_client/master/home1.jpeg)
