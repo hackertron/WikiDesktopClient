@@ -104,8 +104,8 @@ bool del_from_db(QString id,int revid)
 
 QString clean_text(QString text)
 {
-    text = text.replace("\n","");
-    text = text.replace("\"//restbase.wikitolearn.org", "http://restbase.wikitolearn.org");
+    //text = text.replace("\n","");
+    text = text.replace("\"//restbase.wikitolearn.org", "\"http://restbase.wikitolearn.org");
     text = text.replace("src=\"//pool.wikitolearn.org" , "src=\"http://pool.wikitolearn.org");
     return(text);
 }
@@ -252,10 +252,12 @@ bool save_images(QString filename , int pageid) // image saving function
     }
     else{
         content = file.readAll(); // read contents of html file
+        qDebug() <<"testing : " << content;
         //  download images here
 
-        QRegularExpression link_regex("url((.*?));");
+        QRegularExpression link_regex("\"http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg/(.*?)\"");
         QRegularExpressionMatchIterator links = link_regex.globalMatch(content);
+
 
         QRegularExpression png_regex("src=\"http://pool.wikitolearn.org(.*?).png");
         QRegularExpressionMatchIterator png = png_regex.globalMatch(content);
@@ -265,15 +267,18 @@ bool save_images(QString filename , int pageid) // image saving function
 
             // got the links and constructing the url
             QRegularExpressionMatch match = links.next();
-            QString down_link = match.captured(1);
+            qDebug() << match;
 
-            down_link = down_link.remove("(");
-            down_link = down_link.remove(")");
+            QString down_link = match.captured(1);
+            //content = content.replace(down_link,down_link+".svg");
+            down_link = "http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg/" + down_link;
             down_links << down_link;  //prepare list of downloads
             //start downloading images
+
+            // clearn img src in local html file
             QString d = content.replace("http://restbase.wikitolearn.org/en.wikitolearn.org/v1/media/math/render/svg/",""); //clean img src in local html file
             qDebug() << imgpath ;
-            newpath = d.replace("); background-repeat:",".svg); background-repeat:");
+            newpath = d.replace("\" class=\"mwe-math",".svg\" class=\"mwe-math");
         }
 
         while (png.hasNext()){
