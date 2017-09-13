@@ -382,6 +382,7 @@ ApplicationWindow {
             id: webview
             visible: false
             anchors.fill: searchview
+
             onUrlChanged: {
                 //  console.log(searchwebview.url);
 
