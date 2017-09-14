@@ -107,6 +107,7 @@ QString clean_text(QString text)
     //text = text.replace("\n","");
     text = text.replace("\"//restbase.wikitolearn.org", "\"http://restbase.wikitolearn.org");
     text = text.replace("src=\"//pool.wikitolearn.org" , "src=\"http://pool.wikitolearn.org");
+    text = text.replace("<a href=\"/" , "<a href=\"http://en.wikitolearn.org/");
     return(text);
 }
 
