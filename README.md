@@ -13,6 +13,10 @@ WikiToLearn desktop client is a client to browse wikitolearn content on your dev
 
 ![home](https://s28.postimg.org/c0pr5xdu5/image.png)
 
+## Mac Screenshot 
+![home](https://raw.githubusercontent.com/hackertron/WikiDesktopClient/master/mac_home.png)
+![drawer](https://raw.githubusercontent.com/hackertron/WikiDesktopClient/master/mac_home.png)
+
 
 ## Android Screenshot
 
